@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
    int one,two,three,four;
    unsigned char bootSignature;
    unsigned int volumeId;
-   unsigned char volumeLabel[11], fileSystemType[8];
+   unsigned char volumeLabel[12], fileSystemType[9];
 
    // You must set two global variables for the disk access functions:
    //      FILE_SYSTEM_ID         BYTES_PER_SECTOR
@@ -128,17 +128,19 @@ int main(int argc, char *argv[])
    one = ( ( (int) boot[42] ) << 24 ) & 0xff000000;
    two = ( ( (int) boot[41] ) << 16 ) & 0x00ff0000;
    three = ( ( (int) boot[40] ) << 8 ) & 0x0000ff00;
-   four = ( ( (int) boot[39] ) ) & 0x000000ff;
+   four = ( (int) boot[39] ) & 0x000000ff;
 
    volumeId = one | two | three | four;
 
    for(int i = 0; i < 11; i++){
        volumeLabel[i] = boot[43+i];
    }
+   volumeLabel[12] = '\0';
 
    for(int i = 0; i < 8; i++){
        fileSystemType[i] = boot[54+i];
    }
+   fileSystemType[9] = '\0';
 
    printf("Bytes per sector = %d\n"
             "Sectors per cluster = %d\n"
