@@ -82,8 +82,6 @@ ubyte* readFatTable(int fatNumber)
         read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
     }
 
-    print(fat, 2, 8);
-
     return fat;
 }
 
