@@ -1,43 +1,18 @@
-/******************************************************************************
- * main: Sample for starting the FAT project.
- *
- * Authors:  Andy Kinley, Archana Chidanandan, David Mutchler and others.
- *           March, 2004.
- *****************************************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
-// 13 is NOT the correct number -- you fix it!
 #define BYTES_TO_READ_IN_BOOT_SECTOR 62
-
-/******************************************************************************
- * You must set these global variables:
- *    FILE_SYSTEM_ID -- the file id for the file system (here, the floppy disk
- *                      filesystem)
- *    BYTES_PER_SECTOR -- the number of bytes in each sector of the filesystem
- *
- * You may use these support functions (defined in FatSupport.c)
- *    read_sector
- *    write_sector
- *    get_fat_entry
- *    set_fat_entry
- *****************************************************************************/
 
 FILE* FILE_SYSTEM_ID;
 int BYTES_PER_SECTOR;
 
 extern int read_sector(int sector_number, char* buffer);
 
-/******************************************************************************
- * main: an example of reading an item in the boot sector
- *****************************************************************************/
-
 int main(int argc, char *argv[])
 {
-   unsigned char* boot;            // example buffer
+   unsigned char* boot;
 
    int mostSignificantBits;
    int leastSignificantBits;
@@ -54,11 +29,6 @@ int main(int argc, char *argv[])
    unsigned char bootSignature;
    unsigned int volumeId;
    unsigned char volumeLabel[12], fileSystemType[9];
-
-   // You must set two global variables for the disk access functions:
-   //      FILE_SYSTEM_ID         BYTES_PER_SECTOR
-
-   // Use this for an image of a floppy drive
 
 
    if(argc == 1){
@@ -125,10 +95,10 @@ int main(int argc, char *argv[])
 
    bootSignature = boot[38];
 
-   one = ( ( (int) boot[42] ) << 24 ) & 0xff000000;
-   two = ( ( (int) boot[41] ) << 16 ) & 0x00ff0000;
-   three = ( ( (int) boot[40] ) << 8 ) & 0x0000ff00;
-   four = ( (int) boot[39] ) & 0x000000ff;
+   one =   ( ( (int) boot[42] ) << 24 ) & 0xff000000;
+   two =   ( ( (int) boot[41] ) << 16 ) & 0x00ff0000;
+   three = ( ( (int) boot[40] ) << 8  ) & 0x0000ff00;
+   four =  (   (int) boot[39] )         & 0x000000ff;
 
    volumeId = one | two | three | four;
 
