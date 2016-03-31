@@ -6,9 +6,8 @@
 
 #include "../utils/fatSupport.h"
 
-#define BYTES_PER_SECTOR 512
-#define NUM_FAT_SECTORS 9
-#define FAT_TABLE_SIZE BYTES_PER_SECTOR * NUM_FAT_SECTORS  
+#define NUM_FAT_SECTORS 9 
+#define FAT_TABLE_SIZE 512 * NUM_FAT_SECTORS  
 
 typedef unsigned char ubyte;
 typedef char byte;
@@ -16,24 +15,36 @@ typedef char byte;
 FILE* FILE_SYSTEM_ID;
 int BYTES_PER_SECTOR;
 
-bool checkRange(int x, int y);
-ubyte* checkFatTable();
+extern int read_sector(int sector_number, char* buffer);
+extern unsigned int get_fat_entry(int fat_entry_number, char* fat);
 
+bool checkRange(int x, int y);
+ubyte* readFatTable(int fatNumber);
+
+void print(ubyte* fat, int x, int y);
 void useage();
 
 int main(int argc, char** argv)
 {
     int x;
     int y;
+    BYTES_PER_SECTOR = 512;
 
     // Handle commandline args
-    if (argc == 1 || argc > 2)
+    // temp 4 until we get a shell so it can read floppy
+    if (argc == 1 || argc > 4)
     {
         useage();
     }
 
     x = atoi(argv[1]);
     y = atoi(argv[2]);
+    FILE_SYSTEM_ID = fopen(argv[3], "r+");
+    if (FILE_SYSTEM_ID == NULL)
+    {
+        printf("Could not open the floppy drive or image.\n");
+        exit(1);
+    }
 
     bool valid = checkRange(x, y);
     if (!valid)
@@ -43,8 +54,11 @@ int main(int argc, char** argv)
     }
     
     // At this point x and y should be valid
-    
+    ubyte* fat_table = readFatTable(1);
+    print(fat_table, x, y);
 
+    free(fat_table);
+    
     return 0;
 }
 
@@ -56,12 +70,10 @@ bool checkRange(int x, int y)
     if (x < 2)
         return false;
 
-
-    // stub
-    return false;
+    return true;
 }
 
-ubyte* checkFatTable()
+ubyte* readFatTable(int fatNumber)
 {
     ubyte* fat = malloc(FAT_TABLE_SIZE);
 
@@ -70,7 +82,17 @@ ubyte* checkFatTable()
         read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
     }
 
-    return;
+    print(fat, 2, 8);
+
+    return fat;
+}
+
+void print(ubyte* fat, int x, int y)
+{
+   for (int i = x; i <= y; i++)
+   {
+       printf("Entry %d: %x\n", i, get_fat_entry(i, fat));
+   } 
 }
 
 void useage()
