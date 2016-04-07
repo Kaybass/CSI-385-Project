@@ -22,6 +22,8 @@ int mashLoop(FILE * theFile){
     args = mashSplit(line);
 
     stat = mashExecute(args,pipefd)
+
+    read(pipefd[0],/**/,)
   }while(stat);
 
   return stat;
