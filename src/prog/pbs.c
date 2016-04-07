@@ -10,7 +10,7 @@ int BYTES_PER_SECTOR;
 
 extern int read_sector(int sector_number, char* buffer);
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[])// Argument like
 {
    unsigned char* boot;
 
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
        printf("baka\n");
        exit(1);
    }
-   else if(argc >= 2){
+   else if(argc >= 3){
        if(strcmp(argv[1],"-h") == 0){
            printf("One argument, file\n");
            exit(1);
