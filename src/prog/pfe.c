@@ -10,6 +10,8 @@
 #define NUM_FAT_SECTORS 9
 #define FAT_TABLE_SIZE 512 * NUM_FAT_SECTORS
 
+#define MASH_MEM_KEY 6969696699
+
 typedef unsigned char ubyte;
 typedef char byte;
 
@@ -54,7 +56,7 @@ int main(int argc, char** argv)
     }
 
     // At this point x and y should be valid
-    ubyte* fat_table = readFatTable(1);
+    ubyte* fat_table = readFatTable(FAT_TABLE_SIZE,NUM_FAT_SECTORS,BYTES_PER_SECTOR);
     print(fat_table, x, y);
 
     free(fat_table);

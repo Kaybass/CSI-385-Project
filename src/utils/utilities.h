@@ -6,6 +6,6 @@
 #include <unistd.h>
 
 
-ubyte* readFatTable(int fatNumber);
+ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector);
 
 #endif
