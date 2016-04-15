@@ -5,6 +5,7 @@
 #include <stdbool.h> // We are using std99 so this should work
 
 #include "../utils/fatSupport.h"
+#include "../utils/utilities.h"
 
 #define NUM_FAT_SECTORS 9
 #define FAT_TABLE_SIZE 512 * NUM_FAT_SECTORS
@@ -19,7 +20,6 @@ extern int read_sector(int sector_number, char* buffer);
 extern unsigned int get_fat_entry(int fat_entry_number, char* fat);
 
 bool checkRange(int x, int y);
-ubyte* readFatTable(int fatNumber);
 
 void print(ubyte* fat, int x, int y);
 void useage();
@@ -71,18 +71,6 @@ bool checkRange(int x, int y)
         return false;
 
     return true;
-}
-
-ubyte* readFatTable(int fatNumber)
-{
-    ubyte* fat = malloc(FAT_TABLE_SIZE);
-
-    for (int i = 0; i < NUM_FAT_SECTORS; i++)
-    {
-        read_sector(i + 1, &fat[i * BYTES_PER_SECTOR]);
-    }
-
-    return fat;
 }
 
 void print(ubyte* fat, int x, int y)
