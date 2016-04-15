@@ -73,7 +73,7 @@ char mashExecute(char ** args){
       return 0;
     }
 
-    if(strcmp(arg[0]MASH_HELP == 0)){
+    if(strcmp(arg[0],MASH_HELP == 0)){
       printf("Hep\n");
       return 0;
     }
