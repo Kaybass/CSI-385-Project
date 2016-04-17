@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #define BYTES_TO_READ_IN_BOOT_SECTOR 62
 
@@ -37,7 +39,7 @@ int main(int argc, char *argv[])// Argument like
        printf("baka\n");
        exit(1);
    }
-   else if(argc >= 3){
+   else if(argc >= 2){
        if(strcmp(argv[1],"-h") == 0){
            printf("One argument, file\n");
            exit(1);

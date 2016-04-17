@@ -1,26 +1,24 @@
 #include "shell.h"
 
-
+#define DELIM_CHARS " \t\n"
 
 int mashLoop(FILE * theFile){
     char *  line;
     char ** args;
     char    dir[100] = "/";
-    char    stat;
-    char    bufferino[150], buf;
-    int     i;
+    char    stat = 'f';
     int     key = MASH_MEM_KEY;
+    int     argc = 0;
 
 
     do{
-        printf("MASH:%s$", dir);
+        printf("MASH:%s$ ", dir);
         line = mashRead();
-        args = mashSplit(line);
-
-        stat = mashExecute(args)
+        args = mashSplit(line,DELIM_CHARS,&argc);
+        stat = mashExecute(args,dir);
         free(line);
         free(args);
-    }while(stat = 0);
+    }while(stat = 't');
 
 
 
@@ -36,15 +34,12 @@ char *mashRead(){
 }
 
 
-char **mashSplit(char * line){
-
+char **mashSplit(const char* str, const char* delim, int* numtokens){
     char *s = strdup(str);
     size_t tokens_alloc = 1;
     size_t tokens_used = 0;
     char **tokens = calloc(tokens_alloc, sizeof(char*));
     char *token, *rest = s;
-    char delim = ' '
-
     while ((token = strsep(&rest, delim)) != NULL) {
         if (tokens_used == tokens_alloc) {
             tokens_alloc *= 2;
@@ -58,30 +53,35 @@ char **mashSplit(char * line){
     } else {
         tokens = realloc(tokens, tokens_used * sizeof(char*));
     }
+    *numtokens = tokens_used;
     free(s);
     return tokens;
 }
 
 
-char mashExecute(char ** args){
-    pit_t pid, wapid;
-    char dir[30] = "prog/"
+char mashExecute(char ** args, char * currentDir){
+    int pid, wapid;
+    char dir[5] = "bin/";
     int status;
 
-    if(strcmp(arg[0], MASH_PWD) == 0){
-      printf("The current directory\n");
-      return 0;
+    if(strcmp(args[0], MASH_PWD) == 0){
+        printf("%s\n",currentDir);
+        return 0;
     }
 
-    if(strcmp(arg[0],MASH_HELP == 0)){
-      printf("Hep\n");
-      return 0;
+    if(strcmp(args[0],MASH_HELP) == 0){
+        printf("Hep\n");
+        return 0;
+    }
+
+    if(strcmp(args[0],MASH_EXIT) == 0){
+        exit(EXIT_SUCCESS);
     }
 
 
     pid = fork();
     if(pid == 0){
-        if(execv(strcat(dir,arg[0]),args) == -1){
+        if(execv(strcat(dir,args[0]),args) == -1){
             perror("Invalid command, type help for list of commands :)");
         }
         exit(EXIT_FAILURE);
@@ -91,9 +91,9 @@ char mashExecute(char ** args){
     }
     else{
         do {
-          wapid = waitpid(pid, &status, WUNTRACED);
+            wapid = waitpid(pid, &status, WUNTRACED);
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
 
-    return 1;
+    return 't';
 }
