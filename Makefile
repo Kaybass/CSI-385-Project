@@ -11,6 +11,10 @@ bin/fatSupport.o: src/utils/fatSupport.h src/utils/fatSupport.c
 	@make validate-build
 	$(CC) -o $@ $(CC_OPTIONS) -c src/utils/fatSupport.c
 
+bin/utilities.o: src/utils/utilities.h src/utils/utilities.c
+	@make validate-build
+	$(CC) -o $@ $(CC_OPTIONS) -c src/utils/utilities.c
+
 bin/pbs.o: src/prog/pbs.c
 	@make validate-build
 	$(CC) -o $@ $(CC_OPTIONS) -c src/prog/pbs.c
@@ -19,13 +23,13 @@ bin/pfe.o: src/prog/pfe.c
 	@make validate-build
 	$(CC) -o $@ $(CC_OPTIONS) -c src/prog/pfe.c
 
-bin/pbs: bin/pbs.o bin/fatSupport.o
+bin/pbs: bin/pbs.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) bin/pbs.o bin/fatSupport.o -o bin/pbs
+	$(CC) bin/pbs.o bin/fatSupport.o bin/utilities.o -o bin/pbs
 
-bin/pfe: bin/pfe.o bin/fatSupport.o
+bin/pfe: bin/pfe.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) bin/pfe.o bin/fatSupport.o -o bin/pfe
+	$(CC) bin/pfe.o bin/fatSupport.o bin/utilities.o -o bin/pfe
 
 run:
 	@make all
