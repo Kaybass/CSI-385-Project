@@ -1,16 +1,17 @@
 #include "shell.h"
 
-#define DELIM_CHARS " "
+#define DELIM_CHARS " \t\n"
 
-int mashLoop(FILE * theFile){
+int mashLoop(FILE * theFile,char * filename){
     char *  line;
     char ** args;
     char    dir[100] = "/";
     int     stat = 0;
     key_t   key = MASH_MEM_KEY;
-    char    buf[256];
+    //char    buf[256];
     int     shmid, buflen;
     char    *shm, *s;
+    int     i, j, k;
 
     shmid = shmget(key, 27, IPC_CREAT | 0666);
 
@@ -35,8 +36,16 @@ int mashLoop(FILE * theFile){
     */
     do{
 
-        /* Do shared memory here
-        */
+        j      = strlen(filename);
+        k      = strlen(dir);
+
+        s = shm;
+
+        for(i = 0; i < j; i++)
+            *s++ = filename[i];
+        for(i = 0; i < k; i++)
+            *s++ = dir[i];
+        *s = NULL;
 
         printf("MASH:%s$ ", dir);
 
@@ -47,10 +56,14 @@ int mashLoop(FILE * theFile){
         free(line);
         free(args);
 
-        /* Do shared memory here
-        */
+        i = 0;
+        for (s = shm; *s != '*'; s++){
+            dir[i] = *s;
+            i++;
+        }
+        dir[i] = '\0';
 
-    }while(stat = 0);
+    }while(stat == 0);
 
     return stat;
 }
@@ -99,7 +112,7 @@ char **mashSplit(const char* str, const char* delim){
 
 int mashExecute(char ** args, char * currentDir){
     int pid, wapid;
-    char dir[5] = "bin/";
+    char dir[30] = "bin/";
     int status;
 
     /*
@@ -113,17 +126,17 @@ int mashExecute(char ** args, char * currentDir){
     }
     // Help
     if(strcmp(args[0],MASH_HELP) == 0){
-        printf("MASH: MEMED AGAIN SHELL"
-                "Comannds:"
-                "help:  Print help information"
-                "pwd:   Print working directory"
-                "exit:  Exit the program"
-                "pbs:   Print boot sector"
-                "pfe:   Print fat entries"
-                "cd:    Change directory"
-                "cat:   Print file contents"
-                "ls:    Print directory contents"
-                "rmdir: Remove directory"
+        printf("MASH: MEMED AGAIN SHELL\n"
+                "Comannds:\n"
+                "help:  Print help information\n"
+                "pwd:   Print working directory\n"
+                "exit:  Exit the program\n"
+                "pbs:   Print boot sector\n"
+                "pfe:   Print fat entries\n"
+                "cd:    Change directory\n"
+                "cat:   Print file contents\n"
+                "ls:    Print directory contents\n"
+                "rmdir: Remove directory\n"
                 "mkdir: Create directory\n");
         return 0;
     }
@@ -141,9 +154,9 @@ int mashExecute(char ** args, char * currentDir){
         if(execv(strcat(dir,args[0]),args) == -1){ //execute
 
             //If it gets to this point there was an error
-            perror("Invalid command, type help for list of commands :)");
+            perror("Invalid command, type help for list of commands");
         }
-        exit(EXIT_FAILURE);
+        return 0;
     }
     else if(pid < 0){
 

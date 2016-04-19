@@ -17,10 +17,10 @@
 #define MASH_EXIT    "exit"
 #define MASH_MEM_KEY 69696969
 
-int     mashLoop(FILE * theFile);
+int     mashLoop(FILE * theFile, char * filename);
 char *  mashRead();
 char ** mashSplit(const char* str, const char* delim);
-char    mashExecute(char ** args, char * currentDir);
+int     mashExecute(char ** args, char * currentDir);
 
 
 

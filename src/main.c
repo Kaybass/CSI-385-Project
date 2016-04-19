@@ -24,7 +24,7 @@ int main(int argc, char ** argv){
         }
     }
 
-    status = mashLoop(image);
+    status = mashLoop(image,arg[1]);
 
     return status;
 }
