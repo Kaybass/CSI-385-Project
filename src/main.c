@@ -16,15 +16,15 @@ int main(int argc, char ** argv){
             printf("Example usage: MASH [image]\n");
             exit(1);
         }
-        FILE_SYSTEM_ID = fopen(argv[1], "r+");
-        if (FILE_SYSTEM_ID == NULL)
+        image = fopen(argv[1], "r+");
+        if (image == NULL)
         {
             printf("Could not open the floppy drive or image.\n");
             exit(1);
         }
     }
 
-    status = mashLoop(image);
+    status = mashLoop(image,arg[1]);
 
     return status;
 }

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #define BYTES_TO_READ_IN_BOOT_SECTOR 62
 

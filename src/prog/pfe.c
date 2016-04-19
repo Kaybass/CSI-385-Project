@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h> // We are using std99 so this should work
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #include "../utils/fatSupport.h"
 #include "../utils/utilities.h"
