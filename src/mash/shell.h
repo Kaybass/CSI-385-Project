@@ -9,8 +9,8 @@
 #include <sys/wait.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-//#include "../utils/fatSupport.h"
-//#include "../utils/utilities.h"
+#include "../utils/fatSupport.h"
+#include "../utils/utilities.h"
 
 #define MASH_PWD     "pwd"
 #define MASH_HELP    "help"
@@ -19,7 +19,7 @@
 
 int     mashLoop(FILE * theFile);
 char *  mashRead();
-char ** mashSplit(const char* str, const char* delim, int* numtokens);
+char ** mashSplit(const char* str, const char* delim);
 char    mashExecute(char ** args, char * currentDir);
 
 
