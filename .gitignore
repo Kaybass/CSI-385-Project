@@ -34,3 +34,6 @@
 # Vim files
 *.swp
 *.swo
+*.py
+*.pyc
+/bin

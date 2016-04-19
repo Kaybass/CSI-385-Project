@@ -37,7 +37,7 @@ int main(int argc, char *argv[])// Argument like
        printf("baka\n");
        exit(1);
    }
-   else if(argc >= 3){
+   else if(argc >= 2){
        if(strcmp(argv[1],"-h") == 0){
            printf("One argument, file\n");
            exit(1);
