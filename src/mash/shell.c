@@ -12,7 +12,7 @@ int mashLoop(FILE * theFile){
     int     shmid, buflen;
     char    *shm, *s;
 
-    shmid = shmget(key, SHMSZ, IPC_CREAT | 0666);
+    shmid = shmget(key, 27, IPC_CREAT | 0666);
 
     if(shm < 0){
 
