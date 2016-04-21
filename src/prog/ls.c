@@ -43,15 +43,32 @@ int main(int argc, char *argv[])
     else
     {
         printf("baka\n");
-        exit(1); 
-    } 
+        exit(1);
+    }
 
     BYTES_PER_SECTOR = 512;
+    ENTRY_SIZE       = 32;
+
+    FileInfo files[16];
 
     image = (ubyte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
-    image = readFatTable(FAT_TOTAL_SIZE, NUM_SECTORS, BYTES_PER_SECTOR); 
+    read_sector(19,image);
 
-    // what do halp
+    for(int i = 0; i < BYTES_PER_SECTOR / ENTRY_SIZE; i++){
+        for(int j = 0; j < 8; j++){
+            files[i].Filename[j] = image[j + i * 32];
+        }
+        files[i].Filename[9] = '\0';
+
+        for(int j = 9; j < 12; j++){
+            files[i].Filename[j] = image[j + i * 32];
+        }
+        files[i].Filename[3] = '\0';
+
+        files[i].Attributes = image[12 + i * 32];
+
+        files[i].CreationTime[15]
+    }
 
     free(image);
 }
