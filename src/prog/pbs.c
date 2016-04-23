@@ -4,10 +4,9 @@
 #include <string.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include "../utilities.h"
 
 #define BYTES_TO_READ_IN_BOOT_SECTOR 62
-
-#define MASH_MEM_KEY 6969696699
 
 FILE* FILE_SYSTEM_ID;
 int BYTES_PER_SECTOR;
@@ -34,23 +33,18 @@ int main(int argc, char *argv[])// Argument like
    unsigned int volumeId;
    unsigned char volumeLabel[12], fileSystemType[9];
 
+   shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff),0666);
 
-   if(argc == 1){
-       printf("baka\n");
-       exit(1);
+   if(shmid < 0){
+
+       //We couldn't create the segment
+       perror("Oh my god shared memory didn't work, god save us.");
+       exit(EXIT_FAILURE);
    }
-   else if(argc >= 2){
-       if(strcmp(argv[1],"-h") == 0){
-           printf("One argument, file\n");
-           exit(1);
-       }
-       FILE_SYSTEM_ID = fopen(argv[1], "r+");
-       if (FILE_SYSTEM_ID == NULL)
-       {
-          printf("Could not open the floppy drive or image.\n");
-          exit(1);
-       }
-   }
+
+   stuff = (SharedStuff *) shmat(shmid,NULL,0);
+
+   FILE_SYSTEM_ID = stuff->file;
 
    // Set it to this only to read the boot sector
    BYTES_PER_SECTOR = BYTES_TO_READ_IN_BOOT_SECTOR;

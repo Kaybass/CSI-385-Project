@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#define MASH_MEM_KEY 6969696699
+
 typedef unsigned char ubyte;
 typedef char byte;
 
@@ -23,6 +25,12 @@ typedef struct _fileinfo
     char  FirstLogicalCluster[2];
     int   FileSize;
 } FileInfo;
+
+typedef struct _sharedstuff{
+    char dir[100];
+    short FLC;
+    File *file;
+} SharedStuff;
 
 ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector);
 

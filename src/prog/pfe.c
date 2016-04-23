@@ -12,8 +12,6 @@
 #define NUM_FAT_SECTORS 9
 #define FAT_TABLE_SIZE 512 * NUM_FAT_SECTORS
 
-#define MASH_MEM_KEY 6969696699
-
 typedef unsigned char ubyte;
 typedef char byte;
 

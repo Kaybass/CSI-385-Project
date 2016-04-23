@@ -7,8 +7,6 @@
 #include "../utils/fatSupport.h"
 #include "../utils/utilities.h"
 
-#define MASH_MEM_KEY 6969696699
-
 #define NUM_SECTORS 14
 #define FAT_TOTAL_SIZE 512 * NUM_SECTORS
 
