@@ -19,6 +19,10 @@ int main(int argc, char *argv[]){
 
         printf("mkdir takes one argument which is the folder name\n");
     }
+    else if (argc == 2 && strcmp(argv[1],"-h") == 0){
+
+        printf("mkdir takes one argument which is the folder name\n");
+    }
 
     shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff),0666);
 

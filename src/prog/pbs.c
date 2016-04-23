@@ -4,7 +4,7 @@
 #include <string.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include "../utilities.h"
+#include "../utils/utilities.h"
 
 #define BYTES_TO_READ_IN_BOOT_SECTOR 62
 

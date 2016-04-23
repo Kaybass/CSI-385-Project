@@ -44,6 +44,8 @@ int mashLoop(FILE * theFile,char * filename){
         free(line);
         free(args);
 
+        dir = stuff->dir;
+
     }while(stat == 0);
 
     return stat;

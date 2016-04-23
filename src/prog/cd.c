@@ -19,7 +19,11 @@ int main(int argc, char *argv[]){
     }
     else if (argc > 2){
 
-        printf("cd takes one argument which is the file folder\n");
+        printf("cd takes one argument which is the folder\n");
+    }
+    else if (argc == 2 && strcmp(argv[1],"-h") == 0){
+
+        printf("cd takes one argument which is the folder\n");
     }
 
     shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff),0666);

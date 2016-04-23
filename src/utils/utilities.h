@@ -22,7 +22,7 @@ typedef struct _fileinfo
     // ignored 2 bytes
     char  LastWriteTime[2]; //offset 22
     char  LastWriteDate[2];
-    char  FirstLogicalCluster[2];
+    int   FirstLogicalCluster;
     int   FileSize;
 } FileInfo;
 

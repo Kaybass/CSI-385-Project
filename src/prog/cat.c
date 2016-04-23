@@ -19,6 +19,10 @@ int main(int argc, char *argv[]){
 
         printf("cat takes one argument which is the file\n");
     }
+    else if (argc == 2 && strcmp(argv[1],"-h") == 0){
+
+        printf("cat takes one argument which is the file\n");
+    }
 
     shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff),0666);
 
