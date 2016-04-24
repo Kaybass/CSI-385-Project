@@ -49,6 +49,8 @@ int main(int argc, char *argv[])
 
     FileInfo files[16];
 
+    //Logic for finding the first sector to read in based on FLC goes here
+
     image = (ubyte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
     read_sector(19,image);
 
@@ -93,18 +95,35 @@ int main(int argc, char *argv[])
         files[i].FileSize = h | l | j | k;
     }
 
+    //Needs to be implemented
+    //if the last entry of the sector that was read is not 0x00
+    //This means that there is still more to be read in the directory and
+    //the next sector must be read
+
+    //TODO: this section isn't aware of highlighting read only entries
+    //      Also it completely isn't aware of the amount of entries that were read
     for(int i = 0; i < BYTES_PER_SECTOR / ENTRY_SIZE; i++){
 
-        if(files.Filename[0] != 229){
+        if(files[i].Filename[0] != 0xe5 && files[i].Attributes != 0x0f){
 
-            if(files.Filename[0] != 0){
+            if(files[i].Filename[0] != 0){
 
-                //see what flags in Attributes are set
+                if((files[i].Attributes & FAT_HIDDEN)  == 0 &&
+                   (files[i].Attributes & FAT_SYSTEM)  == 0 &&
+                   (files[i].Attributes & FAT_ARCHIVE) == 0){
 
-                //If the wrong bits aren't set print folder name
+                    //directory
+                    if(((files[i].Attributes & FAT_SUBDIRECTORY) >> 4) == 1){
+                        printf("%s/\n", files[i].Filename);
+                    }
+                    //file
+                    else{
+                        printf("%s.%s",files[i].Filename,files[i].type);
+                    }
+                }
             }
-            else{
-                return 0; //maybe?
+            else{ //No file entries left, our work is done here
+                return 0;
             }
         }
     }

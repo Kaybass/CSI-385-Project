@@ -15,12 +15,12 @@ and constants lol
 #define MASH_MEM_KEY 6969696699
 
 //File Attributes bitmask constants
-#define READ_ONLY    01
-#define HIDDEN       02
-#define SYSTEM       04
-#define VOLUMELABEL  08
-#define SUBDIRECTORY 16
-#define ARCHIVE      32
+#define FAT_READ_ONLY    0x01
+#define FAT_HIDDEN       0x02
+#define FAT_SYSTEM       0x04
+#define FAT_VOLUMELABEL  0x08
+#define FAT_SUBDIRECTORY 0x10
+#define FAT_ARCHIVE      0x20
 
 typedef unsigned char ubyte;
 typedef char byte;
