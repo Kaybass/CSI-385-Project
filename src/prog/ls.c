@@ -95,11 +95,17 @@ int main(int argc, char *argv[])
 
     for(int i = 0; i < BYTES_PER_SECTOR / ENTRY_SIZE; i++){
 
-        if(files.Filename[0] == 229 || files.Filename[0] == 0){
+        if(files.Filename[0] != 229){
 
-            //see what flags in Attributes are set
+            if(files.Filename[0] != 0){
 
-            //If the wrong bits aren't set print folder name
+                //see what flags in Attributes are set
+
+                //If the wrong bits aren't set print folder name
+            }
+            else{
+                return 0; //maybe?
+            }
         }
     }
 
