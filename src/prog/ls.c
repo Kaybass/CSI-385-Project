@@ -82,14 +82,14 @@ int main(int argc, char *argv[])
         files[i].LastWriteDate[0] = image[24 + i * 32];
         files[i].LastWriteDate[1] = image[25 + i * 32];
 
-        h = ( ( (int) image[27] ) << 8 ) & 0x0000ff00;
-        l =   ( (int) image[26] )        & 0x000000ff;
+        h = ( ( (int) image[27 + i * 32] ) << 8 ) & 0x0000ff00;
+        l =   ( (int) image[26 + i * 32] )        & 0x000000ff;
         files[i].FirstLogicalCluster = h | l;
 
-        h =   ( ( (int) image[31] ) << 24 ) & 0xff000000;
-        l =   ( ( (int) image[30] ) << 16 ) & 0x00ff0000;
-        j =   ( ( (int) image[29] ) << 8  ) & 0x0000ff00;
-        k =   (   (int) image[28] )         & 0x000000ff;
+        h =   ( ( (int) image[31 + i * 32] ) << 24 ) & 0xff000000;
+        l =   ( ( (int) image[30 + i * 32] ) << 16 ) & 0x00ff0000;
+        j =   ( ( (int) image[29 + i * 32] ) << 8  ) & 0x0000ff00;
+        k =   (   (int) image[28 + i * 32] )         & 0x000000ff;
         files[i].FileSize = h | l | j | k;
     }
 
