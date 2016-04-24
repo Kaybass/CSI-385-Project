@@ -1,3 +1,10 @@
+/*
+This really isn't a utilities file in practice as none of
+the programs in the project can run without these functions
+and constants lol
+*/
+
+
 #ifndef MASH_utilities
 #define MASH_utilities
 
@@ -6,6 +13,14 @@
 #include <unistd.h>
 
 #define MASH_MEM_KEY 6969696699
+
+//File Attributes bitmask constants
+#define READ_ONLY    01
+#define HIDDEN       02
+#define SYSTEM       04
+#define VOLUMELABEL  08
+#define SUBDIRECTORY 16
+#define ARCHIVE      32
 
 typedef unsigned char ubyte;
 typedef char byte;
