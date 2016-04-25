@@ -12,41 +12,29 @@ int mashLoop(FILE * theFile,char * filename){
     int     shmid, buflen;
     char    *shm, *s;
     int     i, j, k;
+    short   flc = 0;
 
-    shmid = shmget(key, 27, IPC_CREAT | 0666);
+    SharedStuff * stuff;
 
-    if(shm < 0){
+    shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff), IPC_CREAT | 0666);
+
+    if(shmid < 0){
 
         //We couldn't create the segment
         perror("Oh my god shared memory didn't work, god save us.");
         exit(EXIT_FAILURE);
     }
 
-    shm = shmat(shmid,NULL,0);
+    stuff = (SharedStuff *) shmat(shmid,NULL,0);
 
-    if(shm == (char*) - 1){
-
-        //we couldn't put the memory on the stack
-        perror("Stuff didn't work");
-        exit(EXIT_FAILURE);
-    }
+    stuff->FLC  = flc;
+    stuff->file = theFile;
+    stuff->dir  = dir;
 
     /*
      * Main loop
     */
     do{
-
-        j      = strlen(filename);
-        k      = strlen(dir);
-
-        s = shm;
-
-        for(i = 0; i < j; i++)
-            *s++ = filename[i];
-        for(i = 0; i < k; i++)
-            *s++ = dir[i];
-        *s = NULL;
-
         printf("MASH:%s$ ", dir);
 
         line = mashRead();
@@ -56,12 +44,7 @@ int mashLoop(FILE * theFile,char * filename){
         free(line);
         free(args);
 
-        i = 0;
-        for (s = shm; *s != '*'; s++){
-            dir[i] = *s;
-            i++;
-        }
-        dir[i] = '\0';
+        dir = stuff->dir;
 
     }while(stat == 0);
 

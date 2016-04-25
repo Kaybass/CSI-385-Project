@@ -15,7 +15,6 @@
 #define MASH_PWD     "pwd"
 #define MASH_HELP    "help"
 #define MASH_EXIT    "exit"
-#define MASH_MEM_KEY 69696969
 
 int     mashLoop(FILE * theFile, char * filename);
 char *  mashRead();

@@ -7,8 +7,6 @@
 #include "../utils/fatSupport.h"
 #include "../utils/utilities.h"
 
-#define MASH_MEM_KEY 6969696699
-
 #define NUM_SECTORS 14
 #define FAT_TOTAL_SIZE 512 * NUM_SECTORS
 
@@ -53,7 +51,9 @@ int main(int argc, char *argv[])
     FileInfo files[16];
 
     image = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
-    read_sector(19, image);
+    read_sector(19,image);
+
+    int h,l,j,k;
 
     for(int i = 0; i < BYTES_PER_SECTOR / ENTRY_SIZE; i++){
         for(int j = 0; j < 8; j++){
@@ -61,12 +61,13 @@ int main(int argc, char *argv[])
         }
         files[i].Filename[8] = '\0';
 
-        for(int j = 9; j < 12; j++){
+        for(int j = 8; j < 11; j++){
             files[i].Type[j] = image[j + i * 32];
         }
         files[i].Type[3] = '\0';
 
-        files[i].Attributes = image[12 + i * 32];
+        files[i].Attributes = image[11 + i * 32];
+
         files[i].CreationTime[0] = image[14 + i * 32];
         files[i].CreationTime[1] = image[15 + i * 32];
 
@@ -82,19 +83,48 @@ int main(int argc, char *argv[])
         files[i].LastWriteDate[0] = image[24 + i * 32];
         files[i].LastWriteDate[1] = image[25 + i * 32];
 
-        // Bit shifting yay :D
-        int one, two, three, four;
-        int mostSignificantBits, leastSignificantBits;
-        
-        mostSignificantBits  = ( ( (int) image[27 + i * 32] ) << 8 ) & 0x0000ff00;     
-        leastSignificantBits = ( ( (int) image[26 + i * 32] )      ) & 0x000000ff;
-        files[i].FirstLogicalCluster = mostSignificantBits | leastSignificantBits;
+        h = ( ( (int) image[27 + i * 32] ) << 8 ) & 0x0000ff00;
+        l =   ( (int) image[26 + i * 32] )        & 0x000000ff;
+        files[i].FirstLogicalCluster = h | l;
 
-        one =   ( ( (int) image[31 + i * 32] ) << 24 ) & 0xff000000;
-        two =   ( ( (int) image[30 + i * 32] ) << 16 ) & 0x00ff0000;
-        three = ( ( (int) image[29 + i * 32] ) << 8  ) & 0x0000ff00;
-        four =  (   (int) image[28 + i * 32] )         & 0x000000ff;
-        files[i].FileSize = one | two | three | four;
+        h =   ( ( (int) image[31 + i * 32] ) << 24 ) & 0xff000000;
+        l =   ( ( (int) image[30 + i * 32] ) << 16 ) & 0x00ff0000;
+        j =   ( ( (int) image[29 + i * 32] ) << 8  ) & 0x0000ff00;
+        k =   (   (int) image[28 + i * 32] )         & 0x000000ff;
+        files[i].FileSize = h | l | j | k;
+    }
+
+    //Needs to be implemented
+    //if the last entry of the sector that was read is not 0x00
+    //This means that there is still more to be read in the directory and
+    //the next sector must be read
+
+    //TODO: this section isn't aware of highlighting read only entries
+    //      Also it completely isn't aware of the amount of entries that were read
+    for(int i = 0; i < BYTES_PER_SECTOR / ENTRY_SIZE; i++){
+
+        if(files[i].Filename[0] != 0xe5 && files[i].Attributes != 0x0f){
+
+            if(files[i].Filename[0] != 0){
+
+                if((files[i].Attributes & FAT_HIDDEN)  == 0 &&
+                        (files[i].Attributes & FAT_SYSTEM)  == 0 &&
+                        (files[i].Attributes & FAT_ARCHIVE) == 0){
+
+                    //directory
+                    if(((files[i].Attributes & FAT_SUBDIRECTORY) >> 4) == 1){
+                        printf("%s/\n", files[i].Filename);
+                    }
+                    //file
+                    else{
+                        printf("%s.%s",files[i].Filename,files[i].Type);
+                    }
+                }
+            }
+            else{ //No file entries left, our work is done here
+                return 0;
+            }
+        }
     }
 
     free(image);
