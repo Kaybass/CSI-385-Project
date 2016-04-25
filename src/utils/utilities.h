@@ -11,7 +11,7 @@ typedef char byte;
 typedef struct _fileinfo
 {
     char  Filename[9]; //starts at offset 0
-    char  type[4];
+    char  Type[4];
     char  Attributes;
     //char  Reserved[2];
     char  CreationTime[2]; //offset 14
@@ -20,7 +20,7 @@ typedef struct _fileinfo
     // ignored 2 bytes
     char  LastWriteTime[2]; //offset 22
     char  LastWriteDate[2];
-    char  FirstLogicalCluster[2];
+    int   FirstLogicalCluster;
     int   FileSize;
 } FileInfo;
 
