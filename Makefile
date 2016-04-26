@@ -9,35 +9,35 @@ all: $(EXE)
 
 bin/fatSupport.o: src/utils/fatSupport.h src/utils/fatSupport.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/utils/fatSupport.c
+	$(CC) $@ $(CC_OPTIONS) -c src/utils/fatSupport.c
 
 bin/utilities.o: src/utils/utilities.h src/utils/utilities.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/utils/utilities.c
+	$(CC) $@ $(CC_OPTIONS) -c src/utils/utilities.c
 
 bin/pbs.o: src/prog/pbs.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/prog/pbs.c
+	$(CC) $@ $(CC_OPTIONS) -c src/prog/pbs.c
 
 bin/pfe.o: src/prog/pfe.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/prog/pfe.c
+	$(CC) $@ $(CC_OPTIONS) -c src/prog/pfe.c
 
 bin/ls.o: src/prog/ls.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -D _SVID_SOURCE -c src/prog/ls.c
+	$(CC) $@ $(CC_OPTIONS) -c src/prog/ls.c
 
 bin/pbs: bin/pbs.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) -D _SVID_SOURCE bin/pbs.o bin/fatSupport.o bin/utilities.o -o bin/pbs
+	$(CC) $@ $(CC_OPTIONS) bin/pbs.o bin/fatSupport.o bin/utilities.o -o bin/pbs
 
 bin/pfe: bin/pfe.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) -D _SVID_SOURCE bin/pfe.o bin/fatSupport.o bin/utilities.o -o bin/pfe
+	$(CC) $@ $(CC_OPTIONS) bin/pfe.o bin/fatSupport.o bin/utilities.o -o bin/pfe
 
 bin/ls: bin/ls.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) -D _SVID_SOURCE bin/ls.o bin/fatSupport.o bin/utilities.o -o bin/ls
+	$(CC) $@ $(CC_OPTIONS) bin/ls.o bin/fatSupport.o bin/utilities.o -o bin/ls
 
 run:
 	@make all

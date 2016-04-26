@@ -12,11 +12,17 @@ and constants lol
 #include <stdio.h>
 #include <unistd.h>
 
+#define DIR_CHAR "/"
+
 //shared memory key for programs
 #define MASH_MEM_KEY 80242069
 
+#define ENTRIES_PER_SECTOR 16
+
 //True for the images we're working with
-//#define BYTES_PER_SECTOR 512
+#define BYTES_PER_SECTOR 512
+
+#define FLC_TO_PC_OFFSET 31
 
 //File Attributes bitmask constants
 #define FAT_READ_ONLY    0x01
@@ -44,7 +50,7 @@ typedef struct _fileinfo
     // ignored 2 bytes
     char  LastWriteTime[2]; //offset 22
     char  LastWriteDate[2];
-    int   FirstLogicalCluster;
+    short FirstLogicalCluster;
     int   FileSize;
 } FileInfo;
 
@@ -56,7 +62,7 @@ typedef struct _fileinfoweactuallycareabout{
 
     char Attributes;  //offset 11
 
-    short FLC;        //offset 26
+    short FirstLogicalCluster;//offset 26
 } ShortFileInfo;
 
 typedef struct _sharedstuff{
@@ -70,8 +76,8 @@ typedef struct _sharedstuff{
 
 ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector);
 
-ShortFileInfo searchForFileEntry(short currentFLC, char * target);
+short searchForFileEntry(short currentFLC, char * target);
 
-char ** splitDirectoryString(char * directoryName);
+char ** splitDirectoryString(char * directoryName, int entryc);
 
 #endif

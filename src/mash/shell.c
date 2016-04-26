@@ -60,18 +60,18 @@ char *mashRead(){
 }
 
 
-char **mashSplit(const char* str, const char* delim, int *argc){
+char **mashSplit(const char* args, const char* delim, int *argc){
 
-    char *s = strdup(str);
+    char *s = strdup(args);
     size_t tokensAllocated = 1;
     size_t tokensUsed = 0;
 
     char **tokens = calloc(tokensAllocated, sizeof(char*));
     char *token, *rest = s;
 
-    while ((token = strsep(&rest, delim)) != NULL) {
+    while((token = strsep(&rest, delim)) != NULL){
 
-        if (tokensUsed == tokensAllocated) {
+        if (tokensUsed == tokensAllocated){
 
             tokensAllocated *= 2;
             tokens = realloc(tokens, tokensAllocated * sizeof(char*));
@@ -80,11 +80,11 @@ char **mashSplit(const char* str, const char* delim, int *argc){
         tokens[tokensUsed++] = strdup(token);
     }
 
-    if (tokensUsed == 0) {
+    if(tokensUsed == 0){
         free(tokens);
         tokens = NULL;
     }
-    else {
+    else{
         tokens = realloc(tokens, tokensUsed * sizeof(char*));
     }
 

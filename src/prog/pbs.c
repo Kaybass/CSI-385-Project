@@ -49,12 +49,9 @@ int main(int argc, char *argv[])// Argument like
 
    FILE_SYSTEM_ID = stuff->file;
 
-   // Set it to this only to read the boot sector
-   BYTES_PER_SECTOR = BYTES_TO_READ_IN_BOOT_SECTOR;
-
    // Then reset it per the value in the boot sector
 
-   boot = (unsigned char*) malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
+   boot = (unsigned char*) malloc(BYTES_TO_READ_IN_BOOT_SECTOR * sizeof(unsigned char));
 
    if (read_sector(0, boot) == -1)
       printf("Something has gone wrong -- could not read the boot sector\n");
