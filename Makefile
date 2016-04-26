@@ -5,7 +5,7 @@ EXE=bin/pbs bin/pfe bin/ls
 OBJ=bin/pbs.o bin/pfe.o bin/fatSupport.o bin/utilities.o
 
 all: $(EXE)
-	@make validate-build	
+	@make validate-build
 
 bin/fatSupport.o: src/utils/fatSupport.h src/utils/fatSupport.c
 	@make validate-build
@@ -29,21 +29,21 @@ bin/ls.o: src/prog/ls.c
 
 bin/pbs: bin/pbs.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) bin/pbs.o bin/fatSupport.o bin/utilities.o -o bin/pbs
+	$(CC) -D _SVID_SOURCE bin/pbs.o bin/fatSupport.o bin/utilities.o -o bin/pbs
 
 bin/pfe: bin/pfe.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) bin/pfe.o bin/fatSupport.o bin/utilities.o -o bin/pfe
+	$(CC) -D _SVID_SOURCE bin/pfe.o bin/fatSupport.o bin/utilities.o -o bin/pfe
 
 bin/ls: bin/ls.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) bin/ls.o bin/fatSupport.o bin/utilities.o -o bin/ls
+	$(CC) -D _SVID_SOURCE bin/ls.o bin/fatSupport.o bin/utilities.o -o bin/ls
 
 run:
 	@make all
 
 clean:
-	rm -f $(EXE) $(OBJ) 
+	rm -f $(EXE) $(OBJ)
 
 validate-build:
 	if ! [ -d "./bin" ]; then mkdir -p "./bin"; fi
