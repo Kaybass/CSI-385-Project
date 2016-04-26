@@ -12,7 +12,11 @@ and constants lol
 #include <stdio.h>
 #include <unistd.h>
 
+//shared memory key for programs
 #define MASH_MEM_KEY 80242069
+
+//True for the images we're working with
+//#define BYTES_PER_SECTOR 512
 
 //File Attributes bitmask constants
 #define FAT_READ_ONLY    0x01
@@ -21,6 +25,9 @@ and constants lol
 #define FAT_VOLUMELABEL  0x08
 #define FAT_SUBDIRECTORY 0x10
 #define FAT_ARCHIVE      0x20
+
+
+//Types, Ethan's code uses the byte types
 
 typedef unsigned char ubyte;
 typedef char byte;
@@ -41,12 +48,30 @@ typedef struct _fileinfo
     int   FileSize;
 } FileInfo;
 
+//file info for things that aren't ls
+typedef struct _fileinfoweactuallycareabout{
+
+    char Filename[9]; //offset 0
+    char type[4];     //offset 8
+
+    char Attributes;  //offset 11
+
+    short FLC;        //offset 26
+} ShortFileInfo;
+
 typedef struct _sharedstuff{
     char dir[100];
     short FLC;
     FILE *file;
 } SharedStuff;
 
+
+//Functions
+
 ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector);
+
+ShortFileInfo searchForFileEntry(short currentFLC, char * target);
+
+char ** splitDirectoryString(char * directoryName);
 
 #endif

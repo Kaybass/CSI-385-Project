@@ -7,13 +7,23 @@
 #include "../utils/fatSupport.h"
 #include "../utils/utilities.h"
 
+FILE* FILE_SYSTEM_ID;
+int BYTES_PER_SECTOR;
 
 int main(int argc, char *argv[]){
 
     if (argc == 1){
 
-        printf("No arguments given\n");
-        exit(1);
+        const char *args[1];
+        args[0] = "ls";
+
+        //magic string is bad boy points, change later
+        if(execv("/bin/ls",args) == -1){ //execute
+
+            //If it gets to this point there was an error
+            perror("MASH is probably being run from the wrong directory");
+        }
+        return 0;
     }
     else if (argc > 2){
 

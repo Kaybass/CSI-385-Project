@@ -8,10 +8,10 @@ int mashLoop(FILE * theFile,char * filename){
     char    dir[100] = "/";
     int     stat = 0;
     key_t   key = MASH_MEM_KEY;
-    //char    buf[256];
     int     shmid, buflen;
     char    *shm, *s;
     int     i, j, k;
+    int     argc = 0;
     short   flc = 0;
 
     SharedStuff * stuff;
@@ -39,7 +39,7 @@ int mashLoop(FILE * theFile,char * filename){
 
         line = mashRead();
         args = mashSplit(line,DELIM_CHARS);
-        stat = mashExecute(args,dir);
+        stat = mashExecute(args,dir,&argc);
 
         free(line);
         free(args);
@@ -60,40 +60,42 @@ char *mashRead(){
 }
 
 
-char **mashSplit(const char* str, const char* delim){
+char **mashSplit(const char* str, const char* delim, int *argc){
 
     char *s = strdup(str);
-    size_t tokens_alloc = 1;
-    size_t tokens_used = 0;
+    size_t tokensAllocated = 1;
+    size_t tokensUsed = 0;
 
-    char **tokens = calloc(tokens_alloc, sizeof(char*));
+    char **tokens = calloc(tokensAllocated, sizeof(char*));
     char *token, *rest = s;
 
     while ((token = strsep(&rest, delim)) != NULL) {
 
-        if (tokens_used == tokens_alloc) {
+        if (tokensUsed == tokensAllocated) {
 
-            tokens_alloc *= 2;
-            tokens = realloc(tokens, tokens_alloc * sizeof(char*));
+            tokensAllocated *= 2;
+            tokens = realloc(tokens, tokensAllocated * sizeof(char*));
         }
 
-        tokens[tokens_used++] = strdup(token);
+        tokens[tokensUsed++] = strdup(token);
     }
 
-    if (tokens_used == 0) {
+    if (tokensUsed == 0) {
         free(tokens);
         tokens = NULL;
     }
     else {
-        tokens = realloc(tokens, tokens_used * sizeof(char*));
+        tokens = realloc(tokens, tokensUsed * sizeof(char*));
     }
+
+    argc = tokensUsed
     free(s);
 
     return tokens;
 }
 
-
-int mashExecute(char ** args, char * currentDir){
+//This function like many other things at this point is bad
+int mashExecute(char ** args, int argc, char * currentDir){
     int pid, wapid;
     char dir[30] = "bin/";
     int status;
@@ -119,8 +121,7 @@ int mashExecute(char ** args, char * currentDir){
                 "cd:    Change directory\n"
                 "cat:   Print file contents\n"
                 "ls:    Print directory contents\n"
-                "rmdir: Remove directory\n"
-                "mkdir: Create directory\n");
+                "mnt:   Mount new image\n");
         return 0;
     }
     // Exit
@@ -128,6 +129,38 @@ int mashExecute(char ** args, char * currentDir){
         exit(EXIT_SUCCESS);
     }
 
+    // Mount
+    if(strcmp(args[0],MASH_MOUNT) == 0){
+
+        if (argc == 1){
+
+            printf("No arguments given\n");
+            return 0;
+        }
+        else if (argc > 2){
+
+            printf("mnt takes one argument which is the image\n");
+            return 0;
+        }
+        else if (argc == 2 && strcmp(argv[1],"-h") == 0){
+
+            printf("mnt takes one argument which is the image\n");
+            return 0;
+        }
+
+        FILE * theFile = fopen(argv[1], "r+");
+
+        if(theFile == NULL){
+
+            perror("Image doesn't exist");
+        }
+        else{
+
+            fclose(stuff->file);
+            stuff->file = theFile;
+        }
+        return 0;
+    }
 
     /*
      * Execution of non built in program

@@ -7,8 +7,8 @@
 #include "../utils/fatSupport.h"
 #include "../utils/utilities.h"
 
-#define MASH_MEM_KEY 6969696699
-
+FILE* FILE_SYSTEM_ID;
+int BYTES_PER_SECTOR;
 
 int main(int argc, char *argv[]){
 

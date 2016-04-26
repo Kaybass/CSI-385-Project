@@ -16,3 +16,13 @@ ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector)
 
     return fat;
 }
+
+ShortFileInfo searchForFileEntry(short currentFLC, char * target){
+
+
+}
+
+char ** splitDirectoryString(char * directoryName){
+
+    
+}

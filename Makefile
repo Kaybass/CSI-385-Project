@@ -1,5 +1,5 @@
 CC=gcc
-CC_OPTIONS=-std=c99
+CC_OPTIONS=-std=c99 -D _SVID_SOURCE
 
 EXE=bin/pbs bin/pfe bin/ls
 OBJ=bin/pbs.o bin/pfe.o bin/fatSupport.o bin/utilities.o
