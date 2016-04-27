@@ -16,8 +16,9 @@
 #define MASH_HELP    "help"
 #define MASH_EXIT    "exit"
 #define MASH_MOUNT   "mnt"
+#define MASH_PSHM    "pshm"
 
-int     mashLoop(FILE * theFile, char * filename);
+int     mashLoop( char * filename);
 char *  mashRead();
 char ** mashSplit(const char* str, const char* delim, int *argc);
 int     mashExecute(char ** args, int argc,SharedStuff * stuff);

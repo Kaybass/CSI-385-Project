@@ -39,14 +39,12 @@ int read_sector(int sector_number, unsigned char* buffer)
 {
    int bytes_read;
 
-   printf("meme\n" );
    if (fseek(FILE_SYSTEM_ID,
              (long) sector_number * (long) BYTES_PER_SECTOR, SEEK_SET) != 0)
    {
 	   printf("Error accessing sector %d\n", sector_number);
       return -1;
    }
-   printf("meme\n" );
 
    bytes_read = fread(buffer, sizeof(char), BYTES_PER_SECTOR, FILE_SYSTEM_ID);
 

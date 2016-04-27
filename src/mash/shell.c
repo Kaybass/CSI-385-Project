@@ -2,7 +2,7 @@
 
 #define DELIM_CHARS " \t\n"
 
-int mashLoop(FILE * theFile,char * filename){
+int mashLoop(char * filename){
     char *  line;
     char ** args;
     char    dir[100] = "/";
@@ -28,7 +28,6 @@ int mashLoop(FILE * theFile,char * filename){
     stuff = (SharedStuff *) shmat(shmid,NULL,0);
 
     stuff->FLC  = flc;
-    stuff->file = theFile;
     strcpy(stuff->dir, dir);
     strcpy(stuff->filename,filename);
 
@@ -36,9 +35,10 @@ int mashLoop(FILE * theFile,char * filename){
      * Main loop
     */
     do{
-        printf("MASH:%s$ ", stuff->filename);
+        printf("MASH:%s$ ", stuff->dir);
 
         line = mashRead();
+
         args = mashSplit(line,DELIM_CHARS,&argc);
         stat = mashExecute(args,argc,stuff);
 
@@ -87,7 +87,7 @@ char **mashSplit(const char* args, const char* delim, int *argc){
         tokens = realloc(tokens, tokensUsed * sizeof(char*));
     }
 
-    argc = tokensUsed;
+    *argc = tokensUsed - 1;
     free(s);
 
     return tokens;
@@ -109,7 +109,7 @@ int mashExecute(char ** args, int argc, SharedStuff * stuff){
         return 0;
     }
     // Help
-    if(strcmp(args[0],MASH_HELP) == 0){
+    else if(strcmp(args[0],MASH_HELP) == 0){
         printf("MASH: MEMED AGAIN SHELL\n"
                 "Comannds:\n"
                 "help:  Print help information\n"
@@ -124,12 +124,18 @@ int mashExecute(char ** args, int argc, SharedStuff * stuff){
         return 0;
     }
     // Exit
-    if(strcmp(args[0],MASH_EXIT) == 0){
+    else if(strcmp(args[0],MASH_EXIT) == 0){
         exit(EXIT_SUCCESS);
     }
 
+    // Print shared memory
+    else if(strcmp(args[0],MASH_PSHM) == 0){
+        printf("%s, %d, %s\n", stuff->dir, stuff->FLC, stuff->filename);
+        return 0;
+    }
+
     // Mount
-    if(strcmp(args[0],MASH_MOUNT) == 0){
+    else if(strcmp(args[0],MASH_MOUNT) == 0){
 
         if (argc == 1){
 
@@ -155,10 +161,10 @@ int mashExecute(char ** args, int argc, SharedStuff * stuff){
         }
         else{
 
-            fclose(stuff->file);
-            stuff->file = theFile;
+            fclose(theFile);
             stuff->FLC = 0;
             strcpy(stuff->dir, "/");
+            strcpy(stuff->filename, args[1]);
         }
         return 0;
     }
@@ -166,26 +172,28 @@ int mashExecute(char ** args, int argc, SharedStuff * stuff){
     /*
      * Execution of non built in program
     */
-    pid = fork();
-    if(pid == 0){
-        if(execv(strcat(dir,args[0]),args) == -1){ //execute
-
-            //If it gets to this point there was an error
-            perror("Invalid command, type help for list of commands");
-        }
-        return 0;
-    }
-    else if(pid < 0){
-
-        //forking failed
-        perror("Computer did us wrong");
-    }
     else{
+        pid = fork();
+        if(pid == 0){
+            if(execv(strcat(dir,args[0]),args) == -1){ //execute
 
-        //Wait for the program to finish
-        do {
-            wapid = waitpid(pid, &status, WUNTRACED);
-        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+                //If it gets to this point there was an error
+                perror("Invalid command, type help for list of commands");
+            }
+            return 0;
+        }
+        else if(pid < 0){
+
+            //forking failed
+            perror("Computer did us wrong");
+        }
+        else{
+
+            //Wait for the program to finish
+            do {
+                wapid = waitpid(pid, &status, WUNTRACED);
+            } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+        }
     }
 
     return 0;

@@ -5,6 +5,8 @@ extern int write_sector(int sector_number, char* buffer);
 extern unsigned int get_fat_entry(int fat_entry_number, char* fat);
 extern void set_fat_entry(int fat_entry_number, int value, char* fat);
 
+int BYTES_PER_SECTOR;
+
 ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector)
 {
     ubyte* fat = malloc(fatTableSize);
@@ -20,31 +22,87 @@ ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector)
 /*
  * Things assumed by this function:
  * - It's being fed a real directory i.e input checking was done
- * - I'm a bad prgrammer
- * - Like really really bad
- *
 */
 short searchForFolder(short currentFLC, char * target){
 
     int entryCount;
 
-    unsigned char sector;
+    unsigned char * sector;
 
     char ** dirs;
     int     depth;
 
-    if(target[0] == '/'){
-        splitDirectoryString(dirs,depth);
+    BYTES_PER_SECTOR = 512;
 
+    int index = 0;
+
+    if(target[0] == '/'){
+        splitDirectoryString(target,&depth);
+
+        //the way string splitting works in our case /dir makes depth 2
+        depth--;
+        index++;
+
+        sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+
+        ShortFileInfo entries[16];
+
+        /*  Massive bad boy points here, we know that
+            every example image has a root folder that
+            is only one sector long and we're taking
+            advantage of that here.*/
+        read_sector(19,sector);
+
+        for(int i = 0; i < BYTES_PER_SECTOR / 32; i++){
+            for(int j = 0; j < 8; j++){
+                entries[i].Filename[j] = sector[j + i * 32];
+            }
+            entries[i].Filename[8] = '\0';
+        }
+
+        free(sector);
+
+        for(int i = 0; i < 16; i++){
+
+            if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+                (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
+
+                if(depth != index){
+
+                    return searchHarderForFolder(entries[i].FirstLogicalCluster,dirs,index,depth);
+                }
+                else{
+
+                    return entries[i].FirstLogicalCluster;
+                }
+            }
+        }
+
+        return -1;
 
     }
     else{
-        splitDirectoryString(dirs,depth);
+        splitDirectoryString(target,&depth);
+
+        
     }
 
 }
 
-char ** splitDirectoryString(char * directoryName, int entryc){
+short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth){
+
+}
+
+short searchForFile(short currentFLC, char * target){
+
+}
+
+short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
+
+}
+
+
+char ** splitDirectoryString(char * directoryName, int *entryc){
 
     char *s = strdup(directoryName);
     size_t tokensAllocated = 1;
@@ -71,7 +129,7 @@ char ** splitDirectoryString(char * directoryName, int entryc){
         tokens = realloc(tokens, tokensUsed * sizeof(char*));
     }
 
-    entryc = tokensUsed;
+    *entryc = tokensUsed;
     free(s);
 
     return tokens;

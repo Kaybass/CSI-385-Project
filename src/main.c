@@ -22,9 +22,10 @@ int main(int argc, char ** argv){
             printf("Could not open the floppy drive or image.\n");
             exit(1);
         }
+        fclose(image);
     }
 
-    status = mashLoop(image,argv[1]);
+    status = mashLoop(argv[1]);
 
     return status;
 }

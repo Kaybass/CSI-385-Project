@@ -12,7 +12,8 @@
 
 FILE* FILE_SYSTEM_ID;
 int BYTES_PER_SECTOR;
-int ENTRY_SIZE;
+
+#define ENTRY_SIZE 32
 
 extern unsigned int get_fat_entry(int fat_entry_number, char* fat);
 
@@ -46,7 +47,6 @@ int main(int argc, char *argv[])
     }
 
     BYTES_PER_SECTOR = 512;
-    ENTRY_SIZE       = 32;
 
     FileInfo files[16];
 
@@ -94,13 +94,8 @@ int main(int argc, char *argv[])
         files[i].FileSize = h | l | j | k;
     }
 
-    //Needs to be implemented
-    //if the last entry of the sector that was read is not 0x00
-    //This means that there is still more to be read in the directory and
-    //the next sector must be read
+    printf("NAME     TYPE   SIZE   FLC\n");
 
-    //TODO: this section isn't aware of highlighting read only entries
-    //      Also it completely isn't aware of the amount of entries that were read
     for(int i = 0; i < BYTES_PER_SECTOR / ENTRY_SIZE; i++){
 
         if(files[i].Filename[0] != 0xe5 &&
@@ -120,8 +115,7 @@ int main(int argc, char *argv[])
                     else
                         type = files[i].Type;
 
-                    // TODO: Format this later
-                    printf("%s    %s    %d    %d\n", files[i].Filename,
+                    printf("%8s %3s   %5d   %3d\n", files[i].Filename,
                                                      type,
                                                      files[i].FileSize,
                                                      files[i].FirstLogicalCluster);

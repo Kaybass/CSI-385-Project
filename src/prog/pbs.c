@@ -41,16 +41,23 @@ int main(int argc, char *argv[])// Argument like
    if(shmid < 0){
 
        //We couldn't create the segment
-       perror("Oh my god shared memory didn't work, god save us.");
+       perror("Oh my god shared memory didn't work.");
        exit(EXIT_FAILURE);
    }
 
    if((stuff = (SharedStuff *) shmat(shmid,NULL,0)) == (SharedStuff *) -1){
-       perror("NOOOOOOOOOOOOOO");
+       perror("Oh my god shared memory didn't work.");
        exit(1);
    }
 
-   FILE_SYSTEM_ID = stuff->file;
+   printf("%s\n", stuff->filename );
+
+   FILE_SYSTEM_ID = fopen(stuff->filename, "r+");
+   if (FILE_SYSTEM_ID == NULL)
+   {
+       printf("Could not open the floppy drive or image.\n");
+       exit(1);
+   }
 
    BYTES_PER_SECTOR = BYTES_TO_READ_IN_BOOT_SECTOR;
 
@@ -142,6 +149,7 @@ int main(int argc, char *argv[])// Argument like
              fileSystemType);
 
    free(boot);
+   fclose(FILE_SYSTEM_ID);
 
    return 0;
 }

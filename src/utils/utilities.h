@@ -34,6 +34,7 @@ and constants lol
 #define FAT_SUBDIRECTORY 0x10
 #define FAT_ARCHIVE      0x20
 
+extern FILE * FILE_SYSTEM_ID;
 
 //Types, Ethan's code uses the byte types
 
@@ -70,7 +71,6 @@ typedef struct _fileinfoweactuallycareabout{
 typedef struct _sharedstuff{
     char dir[100];
     short FLC;
-    FILE *file;
     char filename[30];
 } SharedStuff;
 
@@ -80,10 +80,12 @@ typedef struct _sharedstuff{
 ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector);
 
 short searchForFolder(short currentFLC, char * target);
+short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth);
 
 short searchForFile(short currentFLC, char * target);
+short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth);
 
-char ** splitDirectoryString(char * directoryName, int entryc);
+char ** splitDirectoryString(char * directoryName, int *entryc);
 
 int* lookupSectors(int FLC, ubyte* image);
 
