@@ -5,14 +5,10 @@
 int mashLoop(char * filename){
     char *  line;
     char ** args;
-    char    dir[100] = "/";
+    char *  dir = "/";
     int     stat = 0;
-    key_t   key = MASH_MEM_KEY;
-    int     shmid, buflen;
-    char    *shm, *s;
-    int     i, j, k;
+    int     shmid;
     int     argc = 0;
-    short   flc = 0;
 
     SharedStuff * stuff;
 
@@ -27,7 +23,7 @@ int mashLoop(char * filename){
 
     stuff = (SharedStuff *) shmat(shmid,NULL,0);
 
-    stuff->FLC  = flc;
+    stuff->FLC  = 0;
     strcpy(stuff->dir, dir);
     strcpy(stuff->filename,filename);
 
