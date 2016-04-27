@@ -38,8 +38,8 @@ int mashLoop(char * filename){
         printf("MASH:%s$ ", stuff->dir);
 
         line = mashRead();
-
         args = mashSplit(line,DELIM_CHARS,&argc);
+        printf("%d\n", argc);
         stat = mashExecute(args,argc,stuff);
 
         free(line);

@@ -30,10 +30,10 @@ int main(int argc, char** argv)
 {
     int x;
     int y;
+    int shmid;
+    SharedStuff* stuff;
     BYTES_PER_SECTOR = 512;
 
-    // Handle commandline args
-    // temp 4 until we get a shell so it can read floppy
     if (argc == 1 || argc > 4)
     {
         useage();
@@ -41,7 +41,22 @@ int main(int argc, char** argv)
 
     x = atoi(argv[1]);
     y = atoi(argv[2]);
-    FILE_SYSTEM_ID = fopen(argv[3], "r+");
+
+    shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff), 0666);
+
+    if(shmid < 0){
+
+        //We couldn't create the segment
+        perror("Oh my god shared memory didn't work.");
+        exit(EXIT_FAILURE);
+    }
+
+    if((stuff = (SharedStuff *) shmat(shmid,NULL,0)) == (SharedStuff *) -1){
+        perror("Oh my god shared memory didn't work.");
+        exit(1);
+    }
+
+    FILE_SYSTEM_ID = fopen(stuff->filename, "r+");
     if (FILE_SYSTEM_ID == NULL)
     {
         printf("Could not open the floppy drive or image.\n");
@@ -60,6 +75,7 @@ int main(int argc, char** argv)
     print(fat_table, x, y);
 
     free(fat_table);
+    fclose(FILE_SYSTEM_ID);
 
     return 0;
 }
