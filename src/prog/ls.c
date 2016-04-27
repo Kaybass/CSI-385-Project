@@ -112,7 +112,20 @@ int main(int argc, char *argv[])
                 if((files[i].Attributes & FAT_HIDDEN)  == 0 &&
                     (files[i].Attributes & FAT_SYSTEM)  == 0){
 
-                    printf("%s    %s    %d    %d\n",files[i].Filename,files[i].Type,files[i].FileSize,files[i].FirstLogicalCluster);
+                    char* type;
+
+                    if ((files[i].Attributes & FAT_SUBDIRECTORY) != 0) {
+                        type = "DIR\0";
+                    }
+                    else
+                        type = files[i].Type;
+
+                    // TODO: Format this later
+                    printf("%s    %s    %d    %d\n", files[i].Filename,
+                                                     type,
+                                                     files[i].FileSize,
+                                                     files[i].FirstLogicalCluster);
+
                 }
             }
             else{ //No file entries left, our work is done here
