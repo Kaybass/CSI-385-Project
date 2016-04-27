@@ -35,7 +35,7 @@ short searchForFileEntry(short currentFLC, char * target){
     dirs = splitDirectoryString(target,depth);
 
     //not root
-    if(target[0] != '/' && FLC != 0){
+    if(target[0] != '/' && currentFLC != 0){
 
         //directory above
         if(target[0] == '.' && target[1] == '.'){
@@ -55,35 +55,35 @@ short searchForFileEntry(short currentFLC, char * target){
         while(status && z < 13){
 
             ShortFileInfo entries[16];
-            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
-            read_sector(19 + z, sector)
+            char *sector = (byte*)malloc(512 * sizeof(ubyte));
+            read_sector(19 + z, sector);
 
             for(int i = 0; i < ENTRIES_PER_SECTOR; i++){
                 for(int j = 0; j < 8; j++){
-                    entries[i].Filename[j] = image[j + i * 32];
+                    entries[i].Filename[j] = sector[j + i * 32];
                 }
                 entries[i].Filename[8] = '\0';
 
                 for(int j = 8; j < 11; j++){
-                    entries[i].Type[j] = image[j + i * 32];
+                    entries[i].Type[j] = sector[j + i * 32];
                 }
                 entries[i].Type[3] = '\0';
 
-                entries[i].Attributes = image[11 + i * 32];
+                entries[i].Attributes = sector[11 + i * 32];
 
-                h = ( ( (int) image[27 + i * 32] ) << 8 ) & 0x0000ff00;
-                l =   ( (int) image[26 + i * 32] )        & 0x000000ff;
+                h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
+                l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
                 entries[i].FirstLogicalCluster = h | l;
             }
 
             for(int i = 0; i < ENTRIES_PER_SECTOR; i++){
 
-                if(strcmp(dirs[0],entries[i].filename) == 0 &&
+                if(strcmp(dirs[0],entries[i].Filename) == 0 &&
                     entries[i].Attributes & FAT_SUBDIRECTORY == 0){
 
                     return entries[i].FirstLogicalCluster;
                 }
-                if (entries[i].filename[0] == 0){
+                if (entries[i].Filename[0] == 0){
                     status = 0;
                 }
             }
@@ -115,7 +115,6 @@ char ** splitDirectoryString(char * directoryName, int entryc){
 
         tokens[tokensUsed++] = strdup(token);
     }
-entries
     if(tokensUsed == 0){
         free(tokens);
         tokens = NULL;
@@ -124,7 +123,7 @@ entries
         tokens = realloc(tokens, tokensUsed * sizeof(char*));
     }
 
-    entryc = tokensUsed
+    entryc = tokensUsed;
     free(s);
 
     return tokens;

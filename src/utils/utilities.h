@@ -8,9 +8,14 @@ and constants lol
 #ifndef MASH_utilities
 #define MASH_utilities
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include "../utils/fatSupport.h"
 
 #define DIR_CHAR "/"
 
@@ -18,9 +23,6 @@ and constants lol
 #define MASH_MEM_KEY 80242069
 
 #define ENTRIES_PER_SECTOR 16
-
-//True for the images we're working with
-#define BYTES_PER_SECTOR 512
 
 #define FLC_TO_PC_OFFSET 31
 
@@ -58,7 +60,7 @@ typedef struct _fileinfo
 typedef struct _fileinfoweactuallycareabout{
 
     char Filename[9]; //offset 0
-    char type[4];     //offset 8
+    char Type[4];     //offset 8
 
     char Attributes;  //offset 11
 

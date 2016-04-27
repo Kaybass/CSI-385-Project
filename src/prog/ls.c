@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     //      Also it completely isn't aware of the amount of entries that were read
     for(int i = 0; i < BYTES_PER_SECTOR / ENTRY_SIZE; i++){
 
-        if(files[i].Filename[0] != 0xe5 && files[i].Attributes != 0x0f){
+        if(files[i].Attributes != 0x0f){
 
             if(files[i].Filename[0] != 0){
 

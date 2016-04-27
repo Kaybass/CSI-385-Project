@@ -2,6 +2,8 @@
 #ifndef FAT_SUPPORT
 #define FAT_SUPPORT
 
+#include "utilities.h"
+
 int read_sector(int sector_number, char* buffer);
 int write_sector(int sector_number, char* buffer);
 
