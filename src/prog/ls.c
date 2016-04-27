@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
         }
         files[i].Filename[8] = '\0';
 
-        for(int j = 8; j < 11; j++){
-            files[i].Type[j] = image[j + i * 32];
+        for(int j = 0; j < 3; j++){
+            files[i].Type[j] = image[j + 8 + i * 32];
         }
         files[i].Type[3] = '\0';
 
