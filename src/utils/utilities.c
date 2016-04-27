@@ -88,3 +88,22 @@ char ** splitDirectoryString(char * directoryName, int entryc){
 
     return tokens;
 }
+
+int* lookupSectors(int FLC, ubyte* image)
+{
+    // This is disgusting fix this later rofl
+    int* sectors = (int*)malloc(10 * sizeof(int));    
+    int currEntry = FLC;
+    int i = 0;
+
+    sectors[0] = currEntry;
+
+    while (currEntry < 0xff8)
+    {
+        currEntry = get_fat_entry(currEntry, (byte*)image);
+        sectors[i] = currEntry + 31; 
+        i++;
+    }
+
+    return sectors;
+}

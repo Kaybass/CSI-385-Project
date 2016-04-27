@@ -84,4 +84,6 @@ short searchForFile(short currentFLC, char * target);
 
 char ** splitDirectoryString(char * directoryName, int entryc);
 
+int* lookupSectors(int FLC, ubyte* image);
+
 #endif
