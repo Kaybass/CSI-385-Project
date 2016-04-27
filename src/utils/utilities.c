@@ -84,7 +84,7 @@ short searchForFolder(short currentFLC, char * target){
     else{
         splitDirectoryString(target,&depth);
 
-        
+
     }
 
 }
@@ -135,20 +135,20 @@ char ** splitDirectoryString(char * directoryName, int *entryc){
     return tokens;
 }
 
-int* lookupSectors(int FLC, ubyte* image)
-{
-    // This is disgusting fix this later rofl
+int* lookupSectors(int FLC, int * length, ubyte* image){
+
     int* sectors = (int*)malloc(10 * sizeof(int));
     int currEntry = FLC;
-    int i = 0;
+    int end = 0;
+    *length = 1;
 
     sectors[0] = currEntry;
 
-    while (currEntry < 0xff8)
+    while (!end)
     {
         currEntry = get_fat_entry(currEntry, (byte*)image);
-        sectors[i] = currEntry + 31;
-        i++;
+        sectors[*length] = currEntry + 31;
+        (*length)++;
     }
 
     return sectors;
