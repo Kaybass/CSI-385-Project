@@ -71,6 +71,7 @@ typedef struct _sharedstuff{
     char dir[100];
     short FLC;
     FILE *file;
+    char filename[30];
 } SharedStuff;
 
 

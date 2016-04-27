@@ -28,32 +28,20 @@ short searchForFolder(short currentFLC, char * target){
 
     int entryCount;
 
+    unsigned char sector;
+
     char ** dirs;
     int     depth;
 
-    //not root
-    if(target[0] != '/' && currentFLC != 0){
-
-        //directory above
-        if(target[0] == '.'){
-
-            if(target[1] == '.'){
-
-            }
-            else{
-                return currentFLC;
-            }
-        }
-        //current directory
-        else{
+    if(target[0] == '/'){
+        splitDirectoryString(dirs,depth);
 
 
-        }
     }
-    //root
     else{
-
+        splitDirectoryString(dirs,depth);
     }
+
 }
 
 char ** splitDirectoryString(char * directoryName, int entryc){
@@ -92,7 +80,7 @@ char ** splitDirectoryString(char * directoryName, int entryc){
 int* lookupSectors(int FLC, ubyte* image)
 {
     // This is disgusting fix this later rofl
-    int* sectors = (int*)malloc(10 * sizeof(int));    
+    int* sectors = (int*)malloc(10 * sizeof(int));
     int currEntry = FLC;
     int i = 0;
 
@@ -101,7 +89,7 @@ int* lookupSectors(int FLC, ubyte* image)
     while (currEntry < 0xff8)
     {
         currEntry = get_fat_entry(currEntry, (byte*)image);
-        sectors[i] = currEntry + 31; 
+        sectors[i] = currEntry + 31;
         i++;
     }
 

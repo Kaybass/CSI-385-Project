@@ -29,22 +29,21 @@ int mashLoop(FILE * theFile,char * filename){
 
     stuff->FLC  = flc;
     stuff->file = theFile;
-    stuff->dir  = dir;
+    strcpy(stuff->dir, dir);
+    strcpy(stuff->filename,filename);
 
     /*
      * Main loop
     */
     do{
-        printf("MASH:%s$ ", dir);
+        printf("MASH:%s$ ", stuff->filename);
 
         line = mashRead();
-        args = mashSplit(line,DELIM_CHARS);
-        stat = mashExecute(args,dir,&argc);
+        args = mashSplit(line,DELIM_CHARS,&argc);
+        stat = mashExecute(args,argc,stuff);
 
         free(line);
         free(args);
-
-        dir = stuff->dir;
 
     }while(stat == 0);
 
@@ -88,14 +87,14 @@ char **mashSplit(const char* args, const char* delim, int *argc){
         tokens = realloc(tokens, tokensUsed * sizeof(char*));
     }
 
-    argc = tokensUsed
+    argc = tokensUsed;
     free(s);
 
     return tokens;
 }
 
 //This function like many other things at this point is bad
-int mashExecute(char ** args, int argc, char * currentDir){
+int mashExecute(char ** args, int argc, SharedStuff * stuff){
     int pid, wapid;
     char dir[30] = "bin/";
     int status;
@@ -106,7 +105,7 @@ int mashExecute(char ** args, int argc, char * currentDir){
 
     // Print working directory
     if(strcmp(args[0], MASH_PWD) == 0){
-        printf("%s\n",currentDir);
+        printf("%s\n",stuff->dir);
         return 0;
     }
     // Help
@@ -142,13 +141,13 @@ int mashExecute(char ** args, int argc, char * currentDir){
             printf("mnt takes one argument which is the image\n");
             return 0;
         }
-        else if (argc == 2 && strcmp(argv[1],"-h") == 0){
+        else if (argc == 2 && strcmp(args[1],"-h") == 0){
 
             printf("mnt takes one argument which is the image\n");
             return 0;
         }
 
-        FILE * theFile = fopen(argv[1], "r+");
+        FILE * theFile = fopen(args[1], "r+");
 
         if(theFile == NULL){
 
@@ -158,6 +157,8 @@ int mashExecute(char ** args, int argc, char * currentDir){
 
             fclose(stuff->file);
             stuff->file = theFile;
+            stuff->FLC = 0;
+            strcpy(stuff->dir, "/");
         }
         return 0;
     }

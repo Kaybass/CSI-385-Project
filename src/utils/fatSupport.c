@@ -6,7 +6,7 @@
  *
  *  get_fat_entry
  *  set_fat_entry
- *  
+ *
  * Authors: Andy Kinley, Archana Chidanandan, David Mutchler and others.
  *          March, 2004.
  *****************************************************************************/
@@ -39,12 +39,14 @@ int read_sector(int sector_number, unsigned char* buffer)
 {
    int bytes_read;
 
+   printf("meme\n" );
    if (fseek(FILE_SYSTEM_ID,
              (long) sector_number * (long) BYTES_PER_SECTOR, SEEK_SET) != 0)
    {
 	   printf("Error accessing sector %d\n", sector_number);
       return -1;
    }
+   printf("meme\n" );
 
    bytes_read = fread(buffer, sizeof(char), BYTES_PER_SECTOR, FILE_SYSTEM_ID);
 
@@ -70,12 +72,12 @@ int read_sector(int sector_number, unsigned char* buffer)
  * Return: the number of bytes written, or -1 if the read fails.
  ****************************************************************************/
 
-int write_sector(int sector_number, unsigned char* buffer) 
+int write_sector(int sector_number, unsigned char* buffer)
 {
    int bytes_written;
 
    if (fseek(FILE_SYSTEM_ID,
-       (long) sector_number * (long) BYTES_PER_SECTOR, SEEK_SET) != 0) 
+       (long) sector_number * (long) BYTES_PER_SECTOR, SEEK_SET) != 0)
    {
       printf("Error accessing sector %d\n", sector_number);
       return -1;
@@ -84,7 +86,7 @@ int write_sector(int sector_number, unsigned char* buffer)
    bytes_written = fwrite(buffer,
                           sizeof(char), BYTES_PER_SECTOR, FILE_SYSTEM_ID);
 
-   if (bytes_written != BYTES_PER_SECTOR) 
+   if (bytes_written != BYTES_PER_SECTOR)
    {
       printf("Error reading sector %d\n", sector_number);
       return -1;
@@ -106,7 +108,7 @@ int write_sector(int sector_number, unsigned char* buffer)
  * Return: the value at the specified entry of the given FAT
  ****************************************************************************/
 
-int get_fat_entry(int fat_entry_number, unsigned char* fat) 
+int get_fat_entry(int fat_entry_number, unsigned char* fat)
 {
    int offset;
    int uv, wx, yz;
@@ -117,14 +119,14 @@ int get_fat_entry(int fat_entry_number, unsigned char* fat)
    // if these bytes are uv,wx,yz then the two FAT12 entries are xuv and yzw
 
    // odd fat entry number, return yzw
-   if (fat_entry_number & 0x0001) 
+   if (fat_entry_number & 0x0001)
    {
       wx = (int) fat[offset];
       yz = (int) fat[offset + 1];
       return ( (yz << 4)  |  ( (wx & 0x00f0) >> 4));
-   } 
+   }
    // even fat entry number, return xuv
-   else 
+   else
    {
       uv = (int) fat[offset];
       wx = (int) fat[offset + 1];
@@ -143,7 +145,7 @@ int get_fat_entry(int fat_entry_number, unsigned char* fat)
  * fat:  The fat table in which to set the given value at the specified entry
  *****************************************************************************/
 
-void set_fat_entry(int fat_entry_number, int value, unsigned char* fat) 
+void set_fat_entry(int fat_entry_number, int value, unsigned char* fat)
 {
    int offset;
    int uv, wx, yz, a, b, c;
@@ -160,7 +162,7 @@ void set_fat_entry(int fat_entry_number, int value, unsigned char* fat)
    c = value & 0x000f;
 
    // odd fat entry number, change yzw to abc, i.e.,
-   if (fat_entry_number & 0x0001) 
+   if (fat_entry_number & 0x0001)
    {
       // wx = cx;
       fat[offset]     = (unsigned char) ((c << 4)  |  (fat[offset] & 0x000f));
@@ -173,7 +175,7 @@ void set_fat_entry(int fat_entry_number, int value, unsigned char* fat)
       // uv = bc;
       fat[offset]     = (unsigned char) (b | c);
       // wx = wa;
-      fat[offset + 1] = (unsigned char) ((fat[offset + 1]  & 
+      fat[offset + 1] = (unsigned char) ((fat[offset + 1]  &
                                           0x00f0)  |  (a >> 8));
    }
 }

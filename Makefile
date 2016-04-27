@@ -1,43 +1,55 @@
 CC=gcc
 CC_OPTIONS=-std=c99 -D _SVID_SOURCE
 
-EXE=bin/pbs bin/pfe bin/ls
+EXE=bin/pbs bin/pfe bin/ls bin/MASH
 OBJ=bin/pbs.o bin/pfe.o bin/fatSupport.o bin/utilities.o
 
 all: $(EXE)
 	@make validate-build
 
-bin/fatSupport.o: src/utils/fatSupport.h src/utils/fatSupport.c
+bin/fatSupport.o: src/utils/fatSupport.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/utils/fatSupport.c
+	$(CC) -o $@ $(CC_OPTIONS) -c $^
 
-bin/utilities.o: src/utils/utilities.h src/utils/utilities.c
+bin/utilities.o: src/utils/utilities.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/utils/utilities.c
+	$(CC) -o $@ $(CC_OPTIONS) -c $^
 
 bin/pbs.o: src/prog/pbs.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/prog/pbs.c
+	$(CC) -o $@ $(CC_OPTIONS) -c $^
 
 bin/pfe.o: src/prog/pfe.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/prog/pfe.c
+	$(CC) -o $@ $(CC_OPTIONS) -c $^
 
 bin/ls.o: src/prog/ls.c
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) -c src/prog/ls.c
+	$(CC) -o $@ $(CC_OPTIONS) -c $^
+
+bin/mash.o: src/mash/shell.c
+	@make validate-build
+	$(CC) -o $@ $(CC_OPTIONS) -c $^
+
+bin/main.o: src/main.c
+	@make validate-build
+	$(CC) -o $@ $(CC_OPTIONS) -c $^
 
 bin/pbs: bin/pbs.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) bin/pbs.o bin/fatSupport.o bin/utilities.o -o bin/pbs
+	$(CC) -o $@ $(CC_OPTIONS) $^
 
 bin/pfe: bin/pfe.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) bin/pfe.o bin/fatSupport.o bin/utilities.o -o bin/pfe
+	$(CC) -o $@ $(CC_OPTIONS) $^
 
 bin/ls: bin/ls.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
-	$(CC) -o $@ $(CC_OPTIONS) bin/ls.o bin/fatSupport.o bin/utilities.o -o bin/ls
+	$(CC) -o $@ $(CC_OPTIONS) $^
+
+bin/MASH: bin/mash.o bin/main.o
+	@make validate-build
+	$(CC) -o $@ $(CC_OPTIONS) $^
 
 run:
 	@make all

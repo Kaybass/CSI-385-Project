@@ -45,17 +45,21 @@ int main(int argc, char *argv[])// Argument like
        exit(EXIT_FAILURE);
    }
 
-   stuff = (SharedStuff *) shmat(shmid,NULL,0);
+   if((stuff = (SharedStuff *) shmat(shmid,NULL,0)) == (SharedStuff *) -1){
+       perror("NOOOOOOOOOOOOOO");
+       exit(1);
+   }
 
    FILE_SYSTEM_ID = stuff->file;
 
+   BYTES_PER_SECTOR = BYTES_TO_READ_IN_BOOT_SECTOR;
+
    // Then reset it per the value in the boot sector
 
-   boot = (unsigned char*) malloc(BYTES_TO_READ_IN_BOOT_SECTOR * sizeof(unsigned char));
+   boot = (unsigned char*) malloc(BYTES_PER_SECTOR * sizeof(unsigned char));
 
    if (read_sector(0, boot) == -1)
       printf("Something has gone wrong -- could not read the boot sector\n");
-
 
    // 12 (not 11) because little endian
    mostSignificantBits  = ( ( (int) boot[12] ) << 8 ) & 0x0000ff00;

@@ -20,7 +20,7 @@
 int     mashLoop(FILE * theFile, char * filename);
 char *  mashRead();
 char ** mashSplit(const char* str, const char* delim, int *argc);
-int     mashExecute(char ** args, int argc, char * currentDir);
+int     mashExecute(char ** args, int argc,SharedStuff * stuff);
 
 
 
