@@ -110,8 +110,7 @@ int main(int argc, char *argv[])
             if(files[i].Filename[0] != 0){
 
                 if((files[i].Attributes & FAT_HIDDEN)  == 0 &&
-                    (files[i].Attributes & FAT_SYSTEM)  == 0 &&
-                    (files[i].Attributes & FAT_ARCHIVE) == 0){
+                    (files[i].Attributes & FAT_SYSTEM)  == 0){
 
                     printf("%s    %s    %d    %d\n",files[i].Filename,files[i].Type,files[i].FileSize,files[i].FirstLogicalCluster);
                 }
