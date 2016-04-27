@@ -78,7 +78,9 @@ typedef struct _sharedstuff{
 
 ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector);
 
-short searchForFileEntry(short currentFLC, char * target);
+short searchForFolder(short currentFLC, char * target);
+
+short searchForFile(short currentFLC, char * target);
 
 char ** splitDirectoryString(char * directoryName, int entryc);
 

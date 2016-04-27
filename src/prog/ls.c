@@ -103,25 +103,21 @@ int main(int argc, char *argv[])
     //      Also it completely isn't aware of the amount of entries that were read
     for(int i = 0; i < BYTES_PER_SECTOR / ENTRY_SIZE; i++){
 
-        if(files[i].Attributes != 0x0f){
+        if(files[i].Filename[0] != 0xe5 &&
+            files[i].Attributes != 0x0f &&
+            files[i].Filename[0] != -27){
 
             if(files[i].Filename[0] != 0){
 
                 if((files[i].Attributes & FAT_HIDDEN)  == 0 &&
-                        (files[i].Attributes & FAT_SYSTEM)  == 0 &&
-                        (files[i].Attributes & FAT_ARCHIVE) == 0){
+                    (files[i].Attributes & FAT_SYSTEM)  == 0 &&
+                    (files[i].Attributes & FAT_ARCHIVE) == 0){
 
-                    //directory
-                    if(((files[i].Attributes & FAT_SUBDIRECTORY) >> 4) == 1){
-                        printf("%s/\n", files[i].Filename);
-                    }
-                    //file
-                    else{
-                        printf("%s.%s",files[i].Filename,files[i].Type);
-                    }
+                    printf("%s    %s    %d    %d\n",files[i].Filename,files[i].Type,files[i].FileSize,files[i].FirstLogicalCluster);
                 }
             }
             else{ //No file entries left, our work is done here
+                printf("End of directory\n");
                 return 0;
             }
         }
