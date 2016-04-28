@@ -35,7 +35,6 @@ int mashLoop(char * filename){
 
         line = mashRead();
         args = mashSplit(line,DELIM_CHARS,&argc);
-        printf("%d\n", argc);
         stat = mashExecute(args,argc,stuff);
 
         free(line);

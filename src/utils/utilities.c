@@ -5,7 +5,8 @@ extern int write_sector(int sector_number, char* buffer);
 extern unsigned int get_fat_entry(int fat_entry_number, char* fat);
 extern void set_fat_entry(int fat_entry_number, int value, char* fat);
 
-int BYTES_PER_SECTOR;
+extern FILE* FILE_SYSTEM_ID;
+extern int BYTES_PER_SECTOR;
 
 ubyte* readFatTable(int fatTableSize,int numFatSectors,int bytesPerSector)
 {
@@ -30,12 +31,15 @@ short searchForFolder(short currentFLC, char * target){
     char ** dirs;
     int     depth;
 
-    BYTES_PER_SECTOR = 512;
-
     int index = 0;
 
+    if(target[0] == '/' && strlen(target) == 1)
+        return 0;
+
     if(target[0] == '/' || currentFLC == 0){
-        splitDirectoryString(target,&depth);
+
+        dirs = splitDirectoryString(target,&depth);
+        printf("%s %d\n", dirs[1], depth);
 
         //the way string splitting works in our case /dir makes depth 2
         depth--;
@@ -56,6 +60,13 @@ short searchForFolder(short currentFLC, char * target){
                 entries[i].Filename[j] = sector[j + i * 32];
             }
             entries[i].Filename[8] = '\0';
+            printf("%s\n", entries[i].Filename);
+
+            entries[i].Attributes = sector[11 + i * 32];
+
+            int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
+            int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
+            entries[i].FirstLogicalCluster = h | l;
         }
 
         free(sector);
@@ -82,7 +93,7 @@ short searchForFolder(short currentFLC, char * target){
         int  length = 0;
         int *weTheSectors;
 
-        splitDirectoryString(target,&depth);
+        dirs = splitDirectoryString(target,&depth);
 
         index = 1;
 
@@ -105,6 +116,7 @@ short searchForFolder(short currentFLC, char * target){
             }
             free(sector);
         }
+        free(weTheSectors);
 
         for(int i = 0; i < 16 * length; i++){
 
@@ -196,7 +208,7 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
             }
             free(sector);
         }
-
+        free(weTheSectors);
         for(int i = 0; i < 16 * length; i++){
 
             if(strcmp(dirs[index - 1],entries[i].Filename) == 0 &&
@@ -234,7 +246,7 @@ short searchForFile(short currentFLC, char * target){
     char stmp[50] = "";
 
     if(target[0] == '/' || currentFLC == 0){
-        splitDirectoryString(target,&depth);
+        dirs = splitDirectoryString(target,&depth);
 
         //the way string splitting works in our case /dir makes depth 2
         depth--;
@@ -285,7 +297,7 @@ short searchForFile(short currentFLC, char * target){
         int  length = 0;
         int *weTheSectors;
 
-        splitDirectoryString(target,&depth);
+        dirs = splitDirectoryString(target,&depth);
 
         index = 1;
 
@@ -308,7 +320,7 @@ short searchForFile(short currentFLC, char * target){
             }
             free(sector);
         }
-
+        free(weTheSectors);
         for(int i = 0; i < 16 * length; i++){
             strcat(stmp,entries[i].Filename);
             strcat(stmp,".");
@@ -406,7 +418,7 @@ short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
             }
             free(sector);
         }
-
+        free(weTheSectors);
         for(int i = 0; i < 16 * length; i++){
             strcat(stmp,entries[i].Filename);
             strcat(stmp,".");
@@ -477,7 +489,7 @@ int* lookupSectors(int FLC, int * length, ubyte* image){
 
     sectors[0] = currEntry;
 
-    while (!end && *length >= 10)
+    while (!end && *length <= 10)
     {
         currEntry = get_fat_entry(currEntry, (byte*)image);
         if(currEntry < 0xFF8){
