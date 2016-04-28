@@ -69,6 +69,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < length; i++){
         printf("%d\n",thing[i]);
     }
+    free(fatTable);
 
     free(thing);
 

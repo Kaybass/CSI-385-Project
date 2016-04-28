@@ -42,7 +42,9 @@ short searchForFolder(short currentFLC, char * target){
         printf("%s %d\n", dirs[1], depth);
 
         //the way string splitting works in our case /dir makes depth 2
-        depth--;
+        if(target[0] == '/')
+            depth--;
+
         index++;
 
         sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
@@ -72,6 +74,13 @@ short searchForFolder(short currentFLC, char * target){
         free(sector);
 
         for(int i = 0; i < 16; i++){
+
+            int h = strlen(entries[i].Filename);
+            int j = strlen(dir[1]);
+
+            if(h > j){
+                entries[i].Filename[j - 1] = '\0';
+            }
 
             if(strcmp(dirs[1],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
