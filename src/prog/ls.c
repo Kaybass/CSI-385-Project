@@ -62,13 +62,9 @@ int main(int argc, char **argv)
 
 
 
-    printf("%d\n", searchForFolder(0,"/COURSE/ACC"));
+    //printf("%d\n", searchForFolder(0,"/COURSE/ACC"));
 
     int * thing = lookupSectors(36,&length,fatTable);
-
-    for (int i = 0; i < length; i++){
-        printf("%d\n",thing[i]);
-    }
 
     free(fatTable);
 
@@ -79,7 +75,7 @@ int main(int argc, char **argv)
     for (int z = 0; z < length; z++) {
         image = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
         read_sector(thing[z],image);
-        for(int i = 0 + (z * length); i < 16 + (z * length); i++){
+        for(int i = 0 + (z * 16); i < 16 + (z * 16); i++){
             for(int j = 0; j < 8; j++){
                 files[i].Filename[j] = image[j + i * 32];
             }
@@ -122,41 +118,32 @@ int main(int argc, char **argv)
         free(image);
     }
 
+    for (int i = 0; i < 48; i++) {
+        printf("%s\n", files[i].Filename);
+    }
+
     printf("NAME     TYPE   SIZE   FLC\n");
 
     for(int i = 0; i < length * 16; i++){
-        printf("%d\n", i);
-        if(files[i].Filename[0] != 0xe5 &&
-            files[i].Attributes != 0x0f &&
-            files[i].Filename[0] != -27){
+        if(files[i].Filename[0] != '\xe5' &&
+            files[i].Filename[0] != '\x0f' &&
+            files[i].Filename[0] != -27 &&
+            files[i].Filename[0] != 0){
+            if((files[i].Attributes & FAT_HIDDEN)  == 0 &&
+                (files[i].Attributes & FAT_SYSTEM)  == 0){
 
-            if(files[i].Filename[0] != 0){
+                char* type;
 
-                if((files[i].Attributes & FAT_HIDDEN)  == 0 &&
-                    (files[i].Attributes & FAT_SYSTEM)  == 0){
+                printf("%8s %3s   %5d   %3d\n", files[i].Filename,
+                                                 files[i].Type,
+                                                 files[i].FileSize,
+                                                 files[i].FirstLogicalCluster);
 
-                    char* type;
-
-                    if ((files[i].Attributes & FAT_SUBDIRECTORY) != 0) {
-                        type = "DIR\0";
-                    }
-                    else
-                        type = files[i].Type;
-
-                    printf("%8s %3s   %5d   %3d\n", files[i].Filename,
-                                                     type,
-                                                     files[i].FileSize,
-                                                     files[i].FirstLogicalCluster);
-
-                }
-            }
-            else{ //No file entries left, our work is done here
-                printf("End of directory\n");
-                return 0;
             }
         }
     }
 
+    free(files);
 
     fclose(FILE_SYSTEM_ID);
 
