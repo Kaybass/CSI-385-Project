@@ -12,9 +12,6 @@
 #define NUM_FAT_SECTORS 9
 #define FAT_TABLE_SIZE 512 * NUM_FAT_SECTORS
 
-typedef unsigned char ubyte;
-typedef char byte;
-
 FILE* FILE_SYSTEM_ID;
 int BYTES_PER_SECTOR;
 
