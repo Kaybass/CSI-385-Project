@@ -17,7 +17,6 @@ int main(int argc, char *argv[]){
     int hardCodeFLC = 2;
     int length;
     int* sectors;
-    ubyte* image;
 
     if (argc == 1){
 
@@ -52,9 +51,21 @@ int main(int argc, char *argv[]){
 
     stuff = (SharedStuff *) shmat(shmid,NULL,0);
 
+    if (argc == 2) {
+        FILE_SYSTEM_ID = fopen(stuff->filename, "r+");
+        if (FILE_SYSTEM_ID == NULL)
+        {
+            printf("Could not open the floppy drive or image.\n");
+            exit(1);
+        }       
+    }
+
     //do cat stuff here
-    image = readFatTable(512 * 9, 9, 512); 
-    sectors = lookupSectors(hardCodeFLC, &length, image); 
+    
+    BYTES_PER_SECTOR = 512;
+
+    ubyte* fatTable = readFatTable(512 * 9, 9, 512); 
+    sectors = lookupSectors(hardCodeFLC, &length, fatTable); 
     
     for (int i = 0; i < length; i++)
     {
@@ -63,11 +74,11 @@ int main(int argc, char *argv[]){
 
         for (int j = 0; j < BYTES_PER_SECTOR; j++)
         {
-            //printf("%c", s[j]);
+            printf("%c", s[j]);
         }
 
         free(s);
     }
 
-    free(image); 
+    free(fatTable); 
 }
