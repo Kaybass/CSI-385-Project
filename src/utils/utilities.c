@@ -76,10 +76,10 @@ short searchForFolder(short currentFLC, char * target){
         for(int i = 0; i < 16; i++){
 
             int h = strlen(entries[i].Filename);
-            int j = strlen(dir[1]);
+            int j = strlen(dirs[1]);
 
             if(h > j){
-                entries[i].Filename[j - 1] = '\0';
+                entries[i].Filename[j] = '\0';
             }
 
             if(strcmp(dirs[1],entries[i].Filename) == 0 &&
@@ -122,7 +122,13 @@ short searchForFolder(short currentFLC, char * target){
                     entries[h].Filename[j] = sector[j + h * 32];
                 }
                 entries[h].Filename[8] = '\0';
+                entries[h].Attributes = sector[11 + i * 32];
+
+                int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
+                int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
+                entries[h].FirstLogicalCluster = h | l;
             }
+
             free(sector);
         }
         free(weTheSectors);
@@ -172,18 +178,32 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
                 entries[i].Filename[j] = sector[j + i * 32];
             }
             entries[i].Filename[8] = '\0';
+            printf("%s\n", entries[i].Filename);
+
+            entries[i].Attributes = sector[11 + i * 32];
+
+            int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
+            int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
+            entries[i].FirstLogicalCluster = h | l;
         }
 
         free(sector);
 
         for(int i = 0; i < 16; i++){
 
+            int h = strlen(entries[i].Filename);
+            int j = strlen(dirs[1]);
+
+            if(h > j){
+                entries[i].Filename[j] = '\0';
+            }
+
             if(strcmp(dirs[1],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
                 if(depth != index){
 
-                    return searchHarderForFolder(entries[i].FirstLogicalCluster,dirs,index,depth);
+                    return searchHarderForFolder(entries[i].FirstLogicalCluster,dirs,index + 1,depth);
                 }
                 else{
 
@@ -204,25 +224,42 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
         free(fatTable);
 
         ShortFileInfo* entries = (ShortFileInfo*)malloc(length * 16 * sizeof(ShortFileInfo));
+        printf("%d %d %d %d\n",depth, index , length, weTheSectors[0]);
+
 
         for(int i = 0; i < length; i++){
-
+            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
             read_sector(weTheSectors[i],sector);
-
             for(int h = 0; h < 16; h++){
                 for(int j = 0; j < 8; j++){
                     entries[h].Filename[j] = sector[j + h * 32];
                 }
                 entries[h].Filename[8] = '\0';
+
+                printf("%s%s\n", entries[h].Filename,"meme");
+                entries[i].Attributes = sector[11 + i * 32];
+
+                int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
+                int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
+                entries[i].FirstLogicalCluster = h | l;
             }
+
             free(sector);
         }
         free(weTheSectors);
+
         for(int i = 0; i < 16 * length; i++){
+            int h = strlen(entries[i].Filename);
+            int j = strlen(dirs[index - 1]);
 
-            if(strcmp(dirs[index - 1],entries[i].Filename) == 0 &&
+            if(h > j){
+                entries[i].Filename[j] = '\0';
+                printf("meme\n" );
+            }
+            printf("%s%s\n", entries[i].Filename,dirs[index]);
+            if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
-
+                printf("meme\n" );
                 if(depth != index){
 
                     short tmp = entries[i].FirstLogicalCluster;
@@ -496,7 +533,7 @@ int* lookupSectors(int FLC, int * length, ubyte* image){
     int end = 0;
     *length = 1;
 
-    sectors[0] = currEntry;
+    sectors[0] = currEntry + 31;
 
     while (!end && *length <= 10)
     {
