@@ -12,6 +12,13 @@ int BYTES_PER_SECTOR;
 
 int main(int argc, char *argv[]){
 
+    SharedStuff* stuff;
+    int shmid;
+    int hardCodeFLC = 2;
+    int length;
+    int* sectors;
+    ubyte* image;
+
     if (argc == 1){
 
         const char *args[1];
@@ -46,4 +53,21 @@ int main(int argc, char *argv[]){
     stuff = (SharedStuff *) shmat(shmid,NULL,0);
 
     //do cat stuff here
+    image = readFatTable(512 * 9, 9, 512); 
+    sectors = lookupSectors(hardCodeFLC, &length, image); 
+    
+    for (int i = 0; i < length; i++)
+    {
+        byte* s = (byte*)malloc(BYTES_PER_SECTOR * sizeof(byte)); 
+        read_sector(sectors[i], s);
+
+        for (int j = 0; j < BYTES_PER_SECTOR; j++)
+        {
+            //printf("%c", s[j]);
+        }
+
+        free(s);
+    }
+
+    free(image); 
 }

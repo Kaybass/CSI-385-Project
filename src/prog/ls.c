@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 
     for (int z = 0; z < length; z++) {
         image = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
-        read_sector(thing[z],image);
+        read_sector(0, image);
         for(int i = 0 + (z * length); i < 16 + (z * length); i++){
             for(int j = 0; j < 8; j++){
                 files[i].Filename[j] = image[j + i * 32];
