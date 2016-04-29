@@ -12,21 +12,21 @@ int BYTES_PER_SECTOR;
 
 int main(int argc, char *argv[]){
 
-    if (argc == 1){
+    // if (argc == 1){
+    //
+    //     printf("No arguments given\n");
+    //     exit(1);
+    // }
+    // else if (argc > 2){
+    //
+    //     printf("cd takes one argument which is the folder\n");
+    // }
+    // else if (argc == 2 && strcmp(argv[1],"-h") == 0){
+    //
+    //     printf("cd takes one argument which is the folder\n");
+    // }
 
-        printf("No arguments given\n");
-        exit(1);
-    }
-    else if (argc > 2){
-
-        printf("cd takes one argument which is the folder\n");
-    }
-    else if (argc == 2 && strcmp(argv[1],"-h") == 0){
-
-        printf("cd takes one argument which is the folder\n");
-    }
-
-    shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff),0666);
+    int shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff),0666);
 
     if(shmid < 0){
 
@@ -35,7 +35,13 @@ int main(int argc, char *argv[]){
         exit(EXIT_FAILURE);
     }
 
-    stuff = (SharedStuff *) shmat(shmid,NULL,0);
+    SharedStuff *stuff = (SharedStuff *) shmat(shmid,NULL,0);
 
-    //do cd stuff here
+    FILE_SYSTEM_ID = fopen(stuff->filename,"r+");
+
+    BYTES_PER_SECTOR = 512;
+
+    printf("%d\n", searchForFile(0,"COURSE/COURSE.TXT"));
+
+    fclose(FILE_SYSTEM_ID);
 }

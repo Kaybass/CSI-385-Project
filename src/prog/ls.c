@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
     int length = 16;
 
-    int * thing = lookupSectors(36,&length,fatTable);
+    int * thing = lookupSectors(50,&length,fatTable);
 
     free(fatTable);
 

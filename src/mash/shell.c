@@ -57,8 +57,8 @@ char *mashRead(){
 char **mashSplit(const char* args, const char* delim, int *argc){
 
     char *s = strdup(args);
-    size_t tokensAllocated = 1;
-    size_t tokensUsed = 0;
+    int tokensAllocated = 1;
+    int tokensUsed = 0;
 
     char **tokens = calloc(tokensAllocated, sizeof(char*));
     char *token, *rest = s;

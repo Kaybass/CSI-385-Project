@@ -39,13 +39,13 @@ short searchForFolder(short currentFLC, char * target){
     if(target[0] == '/' || currentFLC == 0){
 
         dirs = splitDirectoryString(target,&depth);
-        printf("%s %d\n", dirs[1], depth);
 
         //the way string splitting works in our case /dir makes depth 2
-        if(target[0] == '/')
-            depth--;
 
-        index++;
+        if(target[0] == '/'){
+            index++;
+        }
+
 
         sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
@@ -62,7 +62,6 @@ short searchForFolder(short currentFLC, char * target){
                 entries[i].Filename[j] = sector[j + i * 32];
             }
             entries[i].Filename[8] = '\0';
-            printf("%s\n", entries[i].Filename);
 
             entries[i].Attributes = sector[11 + i * 32];
 
@@ -76,17 +75,15 @@ short searchForFolder(short currentFLC, char * target){
         for(int i = 0; i < 16; i++){
 
             int h = strlen(entries[i].Filename);
-            int j = strlen(dirs[1]);
+            int j = strlen(dirs[index]);
 
             if(h > j){
                 entries[i].Filename[j] = '\0';
             }
-
-            if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+            if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
-                if(depth != index){
-
+                if(depth > index + 1){
                     return searchHarderForFolder(entries[i].FirstLogicalCluster,dirs,index + 1,depth);
                 }
                 else{
@@ -102,9 +99,9 @@ short searchForFolder(short currentFLC, char * target){
         int  length = 0;
         int *weTheSectors;
 
-        dirs = splitDirectoryString(target,&depth);
 
-        index = 1;
+
+        dirs = splitDirectoryString(target,&depth);
 
         ubyte *fatTable = readFatTable(512 * 9, 9 , 512);
         weTheSectors = lookupSectors(currentFLC, &length, fatTable);
@@ -114,19 +111,20 @@ short searchForFolder(short currentFLC, char * target){
         ShortFileInfo* entries = (ShortFileInfo*)malloc(length * 16 * sizeof(ShortFileInfo));
 
         for(int i = 0; i < length; i++){
+            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
             read_sector(weTheSectors[i],sector);
 
-            for(int h = 0; h < 16; h++){
+            for(int h = 0 + (i * 16); h < 16 + (i * 16); h++){
                 for(int j = 0; j < 8; j++){
-                    entries[h].Filename[j] = sector[j + h * 32];
+                    entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
                 }
                 entries[h].Filename[8] = '\0';
-                entries[h].Attributes = sector[11 + i * 32];
+                entries[h].Attributes = sector[11 + (h - i * 16) * 32];
 
-                int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
-                int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
-                entries[h].FirstLogicalCluster = h | l;
+                int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
+                int l =   ( (int) sector[26 + (h - i * 16) * 32] )        & 0x000000ff;
+                entries[h].FirstLogicalCluster = e | l;
             }
 
             free(sector);
@@ -135,7 +133,14 @@ short searchForFolder(short currentFLC, char * target){
 
         for(int i = 0; i < 16 * length; i++){
 
-            if(strcmp(dirs[index - 1],entries[i].Filename) == 0 &&
+            int h = strlen(entries[i].Filename);
+            int j = strlen(dirs[index]);
+
+            if(h > j){
+                entries[i].Filename[j] = '\0';
+            }
+
+            if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
                 if(depth != index){
@@ -173,12 +178,11 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
             advantage of that here.*/
         read_sector(19,sector);
 
-        for(int i = 0; i < BYTES_PER_SECTOR / 32; i++){
+        for(int i = 0; i < 16; i++){
             for(int j = 0; j < 8; j++){
                 entries[i].Filename[j] = sector[j + i * 32];
             }
             entries[i].Filename[8] = '\0';
-            printf("%s\n", entries[i].Filename);
 
             entries[i].Attributes = sector[11 + i * 32];
 
@@ -192,7 +196,7 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
         for(int i = 0; i < 16; i++){
 
             int h = strlen(entries[i].Filename);
-            int j = strlen(dirs[1]);
+            int j = strlen(dirs[index]);
 
             if(h > j){
                 entries[i].Filename[j] = '\0';
@@ -201,7 +205,7 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
             if(strcmp(dirs[1],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
-                if(depth != index){
+                if(depth > index + 1){
 
                     return searchHarderForFolder(entries[i].FirstLogicalCluster,dirs,index + 1,depth);
                 }
@@ -224,24 +228,21 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
         free(fatTable);
 
         ShortFileInfo* entries = (ShortFileInfo*)malloc(length * 16 * sizeof(ShortFileInfo));
-        printf("%d %d %d %d\n",depth, index , length, weTheSectors[0]);
-
 
         for(int i = 0; i < length; i++){
             sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
             read_sector(weTheSectors[i],sector);
-            for(int h = 0; h < 16; h++){
+            for(int h = 0 + (i * 16); h < 16 + (i * 16); h++){
                 for(int j = 0; j < 8; j++){
-                    entries[h].Filename[j] = sector[j + h * 32];
+                    entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
                 }
                 entries[h].Filename[8] = '\0';
 
-                printf("%s%s\n", entries[h].Filename,"meme");
-                entries[i].Attributes = sector[11 + i * 32];
+                entries[h].Attributes = sector[11 + (h - i * 16) * 32];
 
-                int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
-                int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
-                entries[i].FirstLogicalCluster = h | l;
+                int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
+                int l =   ( (int) sector[26 + (h - i * 16) * 32] )        & 0x000000ff;
+                entries[h].FirstLogicalCluster = e | l;
             }
 
             free(sector);
@@ -250,17 +251,15 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
 
         for(int i = 0; i < 16 * length; i++){
             int h = strlen(entries[i].Filename);
-            int j = strlen(dirs[index - 1]);
+            int j = strlen(dirs[index]);
 
             if(h > j){
                 entries[i].Filename[j] = '\0';
-                printf("meme\n" );
             }
-            printf("%s%s\n", entries[i].Filename,dirs[index]);
             if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
-                printf("meme\n" );
-                if(depth != index){
+
+                if(depth > index + 1){
 
                     short tmp = entries[i].FirstLogicalCluster;
                     free(entries);
@@ -280,224 +279,381 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
 }
 
 short searchForFile(short currentFLC, char * target){
-    unsigned char * sector;
 
-    char ** dirs;
-    int     depth;
+        unsigned char * sector;
 
-    BYTES_PER_SECTOR = 512;
+        char ** dirs;
+        int     depth;
 
-    int index = 0;
+        int index = 0;
 
-    char stmp[50] = "";
+        if(target[0] == '/' && strlen(target) == 1)
+            return 0;
 
-    if(target[0] == '/' || currentFLC == 0){
-        dirs = splitDirectoryString(target,&depth);
+        if(target[0] == '/' || currentFLC == 0){
 
-        //the way string splitting works in our case /dir makes depth 2
-        depth--;
-        index++;
+            dirs = splitDirectoryString(target,&depth);
 
-        sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+            //the way string splitting works in our case /dir makes depth 2
 
-        ShortFileInfo entries[16];
-
-        /*  Massive bad boy points here, we know that
-            every example image has a root folder that
-            is only one sector long and we're taking
-            advantage of that here.*/
-        read_sector(19,sector);
-
-        for(int i = 0; i < BYTES_PER_SECTOR / 32; i++){
-            for(int j = 0; j < 8; j++){
-                entries[i].Filename[j] = sector[j + i * 32];
+            if(target[0] == '/'){
+                index++;
             }
-            entries[i].Filename[8] = '\0';
-        }
-
-        free(sector);
 
 
-        for(int i = 0; i < 16; i++){
-            strcat(stmp,entries[i].Filename);
-            strcat(stmp,".");
-            strcat(stmp,entries[i].Type);
-            if(strcmp(dirs[1],stmp) == 0 &&
-                (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
+            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
-                if(depth != index){
+            ShortFileInfo entries[16];
 
-                    return searchHarderForFolder(entries[i].FirstLogicalCluster,dirs,index + 1,depth);
-                }
-                else{
+            /*  Massive bad boy points here, we know that
+                every example image has a root folder that
+                is only one sector long and we're taking
+                advantage of that here.*/
+            read_sector(19,sector);
 
-                    return entries[i].FirstLogicalCluster;
-                }
-            }
-            strcpy(stmp,"");
-        }
-        return -1;
-
-    }
-    else{
-        int  length = 0;
-        int *weTheSectors;
-
-        dirs = splitDirectoryString(target,&depth);
-
-        index = 1;
-
-        ubyte *fatTable = readFatTable(512 * 9, 9 , 512);
-        weTheSectors = lookupSectors(currentFLC, &length, fatTable);
-
-        free(fatTable);
-
-        ShortFileInfo* entries = (ShortFileInfo*)malloc(length * 16 * sizeof(ShortFileInfo));
-
-        for(int i = 0; i < length; i++){
-
-            read_sector(weTheSectors[i],sector);
-
-            for(int h = 0; h < 16; h++){
+            for(int i = 0; i < BYTES_PER_SECTOR / 32; i++){
                 for(int j = 0; j < 8; j++){
-                    entries[h].Filename[j] = sector[j + h * 32];
+                    entries[i].Filename[j] = sector[j + i * 32];
                 }
-                entries[h].Filename[8] = '\0';
+                entries[i].Filename[8] = '\0';
+
+                entries[i].Attributes = sector[11 + i * 32];
+
+                int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
+                int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
+                entries[i].FirstLogicalCluster = h | l;
             }
+
             free(sector);
-        }
-        free(weTheSectors);
-        for(int i = 0; i < 16 * length; i++){
-            strcat(stmp,entries[i].Filename);
-            strcat(stmp,".");
-            strcat(stmp,entries[i].Type);
-            if(strcmp(dirs[index - 1],stmp) == 0 &&
-                (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
 
-                if(depth != index){
+            for(int i = 0; i < 16; i++){
 
-                    short tmp = entries[i].FirstLogicalCluster;
-                    free(entries);
-                    return searchHarderForFolder(tmp,dirs,index + 1,depth);
+                if(depth > index + 1){
+                    int h = strlen(entries[i].Filename);
+                    int j = strlen(dirs[index]);
+
+                    if(h > j){
+                        entries[i].Filename[j] = '\0';
+                    }
+                    if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+                        (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
+
+                        return searchHarderForFile(entries[i].FirstLogicalCluster,dirs,index + 1,depth);
+
+                    }
                 }
                 else{
+                    int godhelpusifthisisnttwo;
+                    char ** theSplit = splitFilenameExtension(dirs[index], &godhelpusifthisisnttwo);
 
-                    short tmp = entries[i].FirstLogicalCluster;
-                    free(entries);
-                    return tmp;
+                    if(godhelpusifthisisnttwo != 2)
+                        return -1;
+
+                    int h = strlen(entries[i].Filename);
+                    int j = strlen(theSplit[0]);
+
+                    if(h > j){
+                        entries[i].Filename[j] = '\0';
+                    }
+
+                    h = strlen(entries[i].Type);
+                    j = strlen(theSplit[1]);
+
+                    if(h > j){
+                        entries[i].Type[j] = '\0';
+                    }
+
+                    char ctmp[20] = "";
+
+                    strcat(ctmp,entries[i].Filename);
+                    strcat(ctmp,".");
+                    strcat(ctmp,entries[i].Type);
+
+                    if(strcmp(dirs[index],ctmp) == 0 &&
+                        (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
+
+                        return entries[i].FirstLogicalCluster;
+
+                    }
                 }
             }
-            strcpy(stmp,"");
+            return -1;
+
         }
-        free(entries);
-        return -1;
-    }
+        else{
+            int  length = 0;
+            int *weTheSectors;
+
+
+
+            dirs = splitDirectoryString(target,&depth);
+
+            ubyte *fatTable = readFatTable(512 * 9, 9 , 512);
+            weTheSectors = lookupSectors(currentFLC, &length, fatTable);
+
+            free(fatTable);
+
+            ShortFileInfo* entries = (ShortFileInfo*)malloc(length * 16 * sizeof(ShortFileInfo));
+
+            for(int i = 0; i < length; i++){
+                sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+
+                read_sector(weTheSectors[i],sector);
+
+                for(int h = 0 + (i * 16); h < 16 + (i * 16); h++){
+                    for(int j = 0; j < 8; j++){
+                        entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
+                    }
+                    entries[h].Filename[8] = '\0';
+                    entries[h].Attributes = sector[11 + (h - i * 16) * 32];
+
+                    int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
+                    int l =   ( (int) sector[26 + (h - i * 16) * 32] )        & 0x000000ff;
+                    entries[h].FirstLogicalCluster = e | l;
+                }
+
+                free(sector);
+            }
+            free(weTheSectors);
+
+            for(int i = 0; i < 16 * length; i++){
+
+                if(depth > index + 1){
+                    int h = strlen(entries[i].Filename);
+                    int j = strlen(dirs[index]);
+
+                    if(h > j){
+                        entries[i].Filename[j] = '\0';
+                    }
+                    if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+                        (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
+
+                        short tmp = entries[i].FirstLogicalCluster;
+                        free(entries);
+                        return searchHarderForFile(tmp,dirs,index + 1,depth);
+
+                    }
+                }
+                else{
+                    int godhelpusifthisisnttwo;
+                    char ** theSplit = splitFilenameExtension(dirs[index], &godhelpusifthisisnttwo);
+
+                    if(godhelpusifthisisnttwo != 2)
+                        return -1;
+
+                    int h = strlen(entries[i].Filename);
+                    int j = strlen(theSplit[0]);
+
+                    if(h > j){
+                        entries[i].Filename[j] = '\0';
+                    }
+
+                    h = strlen(entries[i].Type);
+                    j = strlen(theSplit[1]);
+
+                    if(h > j){
+                        entries[i].Type[j] = '\0';
+                    }
+
+                    char ctmp[20] = "";
+
+                    strcat(ctmp,entries[i].Filename);
+                    strcat(ctmp,".");
+                    strcat(ctmp,entries[i].Type);
+
+                    if(strcmp(dirs[index],ctmp) == 0 &&
+                        (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
+
+                        short tmp = entries[i].FirstLogicalCluster;
+                        free(entries);
+                        return tmp;
+                    }
+                }
+            }
+            free(entries);
+            return -1;
+        }
 }
 
 short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
-    unsigned char * sector;
 
-    char stmp[50] = "";
+        unsigned char * sector;
 
-    if(currentFLC == 0){
+        if(currentFLC == 0){
 
-        sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
-        ShortFileInfo entries[16];
+            ShortFileInfo entries[16];
 
-        /*  Massive bad boy points here, we know that
-            every example image has a root folder that
-            is only one sector long and we're taking
-            advantage of that here.*/
-        read_sector(19,sector);
+            /*  Massive bad boy points here, we know that
+                every example image has a root folder that
+                is only one sector long and we're taking
+                advantage of that here.*/
+            read_sector(19,sector);
 
-        for(int i = 0; i < BYTES_PER_SECTOR / 32; i++){
-            for(int j = 0; j < 8; j++){
-                entries[i].Filename[j] = sector[j + i * 32];
-            }
-            entries[i].Filename[8] = '\0';
-        }
-
-        free(sector);
-
-        for(int i = 0; i < 16; i++){
-            strcat(stmp,entries[i].Filename);
-            strcat(stmp,".");
-            strcat(stmp,entries[i].Type);
-            if(strcmp(dirs[1],stmp) == 0 &&
-                (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
-
-                if(depth != index){
-
-                    return searchHarderForFolder(entries[i].FirstLogicalCluster,dirs,index,depth);
-                }
-                else{
-
-                    return entries[i].FirstLogicalCluster;
-                }
-            }
-            strcpy(stmp,"");
-        }
-        return -1;
-
-    }
-    else{
-        int  length = 0;
-        int *weTheSectors;
-
-        ubyte *fatTable = readFatTable(512 * 9, 9 , 512);
-        weTheSectors = lookupSectors(currentFLC, &length, fatTable);
-
-        free(fatTable);
-
-        ShortFileInfo* entries = (ShortFileInfo*)malloc(length * 16 * sizeof(ShortFileInfo));
-
-        for(int i = 0; i < length; i++){
-
-            read_sector(weTheSectors[i],sector);
-
-            for(int h = 0; h < 16; h++){
+            for(int i = 0; i < 16; i++){
                 for(int j = 0; j < 8; j++){
-                    entries[h].Filename[j] = sector[j + h * 32];
+                    entries[i].Filename[j] = sector[j + i * 32];
                 }
-                entries[h].Filename[8] = '\0';
+                entries[i].Filename[8] = '\0';
+
+                entries[i].Attributes = sector[11 + i * 32];
+
+                int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
+                int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
+                entries[i].FirstLogicalCluster = h | l;
             }
+
             free(sector);
-        }
-        free(weTheSectors);
-        for(int i = 0; i < 16 * length; i++){
-            strcat(stmp,entries[i].Filename);
-            strcat(stmp,".");
-            strcat(stmp,entries[i].Type);
-            if(strcmp(dirs[index - 1],entries[i].Filename) == 0 &&
-                (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
 
-                if(depth != index){
+            for(int i = 0; i < 16; i++){
 
-                    short tmp = entries[i].FirstLogicalCluster;
-                    free(entries);
-                    return searchHarderForFolder(tmp,dirs,index + 1,depth);
+                if(depth > index + 1){
+                    int h = strlen(entries[i].Filename);
+                    int j = strlen(dirs[index]);
+
+                    if(h > j){
+                        entries[i].Filename[j] = '\0';
+                    }
+                    if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+                        (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
+
+                        return searchHarderForFile(entries[i].FirstLogicalCluster,dirs,index + 1,depth);
+
+                    }
                 }
                 else{
+                    int godhelpusifthisisnttwo;
+                    char ** theSplit = splitFilenameExtension(dirs[index], &godhelpusifthisisnttwo);
 
-                    short tmp = entries[i].FirstLogicalCluster;
-                    free(entries);
-                    return tmp;
+                    if(godhelpusifthisisnttwo != 2)
+                        return -1;
+
+                    int h = strlen(entries[i].Filename);
+                    int j = strlen(theSplit[0]);
+
+                    if(h > j){
+                        entries[i].Filename[j] = '\0';
+                    }
+
+                    h = strlen(entries[i].Type);
+                    j = strlen(theSplit[1]);
+
+                    if(h > j){
+                        entries[i].Type[j] = '\0';
+                    }
+
+                    char ctmp[20] = "";
+
+                    strcat(ctmp,entries[i].Filename);
+                    strcat(ctmp,".");
+                    strcat(ctmp,entries[i].Type);
+
+                    if(strcmp(dirs[index],ctmp) == 0 &&
+                        (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
+
+                        return entries[i].FirstLogicalCluster;
+
+                    }
                 }
             }
-            strcpy(stmp,"");
-        }
-        free(entries);
-        return -1;
-    }
-}
+            return -1;
 
+        }
+        else{
+            int  length = 0;
+            int *weTheSectors;
+
+            ubyte *fatTable = readFatTable(512 * 9, 9 , 512);
+            weTheSectors = lookupSectors(currentFLC, &length, fatTable);
+
+            free(fatTable);
+
+            ShortFileInfo* entries = (ShortFileInfo*)malloc(length * 16 * sizeof(ShortFileInfo));
+
+            for(int i = 0; i < length; i++){
+                sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+                read_sector(weTheSectors[i],sector);
+                for(int h = 0 + (i * 16); h < 16 + (i * 16); h++){
+                    for(int j = 0; j < 8; j++){
+                        entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
+                    }
+                    entries[h].Filename[8] = '\0';
+
+                    entries[h].Attributes = sector[11 + (h - i * 16) * 32];
+
+                    int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
+                    int l =   ( (int) sector[26 + (h - i * 16) * 32] )        & 0x000000ff;
+                    entries[h].FirstLogicalCluster = e | l;
+                }
+
+                free(sector);
+            }
+            free(weTheSectors);
+
+            for(int i = 0; i < 16 * length; i++){
+                if(depth > index + 1){
+                    int h = strlen(entries[i].Filename);
+                    int j = strlen(dirs[index]);
+
+                    if(h > j){
+                        entries[i].Filename[j] = '\0';
+                    }
+                    if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+                        (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
+
+                        short tmp = entries[i].FirstLogicalCluster;
+                        free(entries);
+                        return searchHarderForFile(tmp,dirs,index + 1,depth);
+
+                    }
+                }
+                else{
+                    int godhelpusifthisisnttwo;
+                    char ** theSplit = splitFilenameExtension(dirs[index], &godhelpusifthisisnttwo);
+
+                    if(godhelpusifthisisnttwo != 2)
+                        return -1;
+
+                    int h = strlen(entries[i].Filename);
+                    int j = strlen(theSplit[0]);
+
+                    if(h > j){
+                        entries[i].Filename[j] = '\0';
+                    }
+
+                    h = strlen(entries[i].Type);
+                    j = strlen(theSplit[1]);
+
+                    if(h > j){
+                        entries[i].Type[j] = '\0';
+                    }
+
+                    char ctmp[20] = "";
+
+                    strcat(ctmp,entries[i].Filename);
+                    strcat(ctmp,".");
+                    strcat(ctmp,entries[i].Type);
+
+                    if(strcmp(dirs[index],ctmp) == 0 &&
+                        (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
+
+                        short tmp = entries[i].FirstLogicalCluster;
+                        free(entries);
+                        return tmp;
+                    }
+                }
+            }
+            free(entries);
+            return -1;
+        }
+}
 
 char ** splitDirectoryString(char * directoryName, int *entryc){
 
     char *s = strdup(directoryName);
-    size_t tokensAllocated = 1;
-    size_t tokensUsed = 0;
+    int tokensAllocated = 1;
+    int tokensUsed = 0;
 
     char **tokens = calloc(tokensAllocated, sizeof(char*));
     char *token, *rest = s;
@@ -521,6 +677,39 @@ char ** splitDirectoryString(char * directoryName, int *entryc){
     }
 
     *entryc = tokensUsed;
+    free(s);
+
+    return tokens;
+}
+
+char ** splitFilenameExtension(char * file, int *shouldbetwo){
+
+    char *s = strdup(file);
+    int tokensAllocated = 1;
+    int tokensUsed = 0;
+
+    char **tokens = calloc(tokensAllocated, sizeof(char*));
+    char *token, *rest = s;
+
+    while((token = strsep(&rest, DIR_CHAR)) != NULL){
+
+        if(tokensUsed == tokensAllocated){
+
+            tokensAllocated *= 2;
+            tokens = realloc(tokens, tokensAllocated * sizeof(char*));
+        }
+
+        tokens[tokensUsed++] = strdup(token);
+    }
+    if(tokensUsed == 0){
+        free(tokens);
+        tokens = NULL;
+    }
+    else{
+        tokens = realloc(tokens, tokensUsed * sizeof(char*));
+    }
+
+    *shouldbetwo = tokensUsed;
     free(s);
 
     return tokens;

@@ -1,8 +1,8 @@
 CC=gcc
 CC_OPTIONS=-std=c99 -D _SVID_SOURCE
 
-EXE=bin/pbs bin/pfe bin/ls bin/cat bin/MASH
-OBJ=bin/pbs.o bin/pfe.o bin/ls.o bin/cat.o bin/fatSupport.o bin/utilities.o
+EXE=bin/pbs bin/pfe bin/ls bin/cat bin/MASH bin/cd
+OBJ=bin/pbs.o bin/pfe.o bin/ls.o bin/cat.o bin/fatSupport.o bin/utilities.o bin/cd.o
 
 all: $(EXE)
 	@make validate-build
@@ -31,6 +31,10 @@ bin/cat.o: src/prog/cat.c
 	@make validate-build
 	$(CC) -o $@ $(CC_OPTIONS) -c $^
 
+bin/cd.o: src/prog/cd.c
+	@make validate-build
+	$(CC) -o $@ $(CC_OPTIONS) -c $^
+
 bin/mash.o: src/mash/shell.c
 	@make validate-build
 	$(CC) -o $@ $(CC_OPTIONS) -c $^
@@ -52,6 +56,10 @@ bin/ls: bin/ls.o bin/fatSupport.o bin/utilities.o
 	$(CC) -o $@ $(CC_OPTIONS) $^
 
 bin/cat: bin/cat.o bin/fatSupport.o bin/utilities.o
+	@make validate-build
+	$(CC) -o $@ $(CC_OPTIONS) $^
+
+bin/cd: bin/cd.o bin/fatSupport.o bin/utilities.o
 	@make validate-build
 	$(CC) -o $@ $(CC_OPTIONS) $^
 
