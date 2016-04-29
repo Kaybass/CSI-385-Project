@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
 
     BYTES_PER_SECTOR = 512;
 
-    printf("%d\n", searchForFile(0,"COURSE/COURSE.TXT"));
+    printf("%d\n", searchForFile(0,"LARGE.TXT"));
 
     fclose(FILE_SYSTEM_ID);
 }
