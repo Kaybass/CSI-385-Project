@@ -337,7 +337,6 @@ short searchForFile(short currentFLC, char * target){
             free(sector);
 
             for(int i = 0; i < 16; i++){
-                printf("%d %d\n", index, depth);
                 if(depth > index + 1){
                     int h = strlen(entries[i].Filename);
                     int j = strlen(dirs[index]);
@@ -377,8 +376,6 @@ short searchForFile(short currentFLC, char * target){
                     strcat(ctmp,entries[i].Filename);
                     strcat(ctmp,".");
                     strcat(ctmp,entries[i].Type);
-
-                    printf("%s\n",ctmp );
 
                     if(strcmp(dirs[index],ctmp) == 0 &&
                         (FAT_SUBDIRECTORY & entries[i].Attributes) == 0){
