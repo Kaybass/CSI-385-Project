@@ -147,14 +147,13 @@ short searchForFolder(short currentFLC, char * target){
             if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
-                if(depth != index){
+                if(depth > index + 1){
 
                     short tmp = entries[i].FirstLogicalCluster;
                     free(entries);
                     return searchHarderForFolder(tmp,dirs,index + 1,depth);
                 }
                 else{
-
                     short tmp = entries[i].FirstLogicalCluster;
                     free(entries);
                     return tmp;
