@@ -34,21 +34,25 @@ int mashLoop(char * filename){
         printf("MASH:%s$ ", stuff->dir);
 
         line = mashRead();
-        args = mashSplit(line,DELIM_CHARS,&argc);
-        stat = mashExecute(args,argc,stuff);
+        if(strcmp(line,"\n") != 0){
+            args = mashSplit(line,DELIM_CHARS,&argc);
+            stat = mashExecute(args,argc,stuff);
+            free(args);
+        }
 
         free(line);
-        free(args);
+
 
     }while(stat == 0);
 
+    shmctl(shmid, IPC_RMID, NULL);
     return stat;
 }
 
 
 char *mashRead(){
     char *line = NULL;
-    ssize_t buflength = 0;
+    int buflength = 0;
     getline(&line, &buflength, stdin);
     return line;
 }
@@ -56,12 +60,12 @@ char *mashRead(){
 
 char **mashSplit(const char* args, const char* delim, int *argc){
 
-    char *s = strdup(args);
+    char *myCopy = strdup(args);
     int tokensAllocated = 1;
     int tokensUsed = 0;
 
     char **tokens = calloc(tokensAllocated, sizeof(char*));
-    char *token, *rest = s;
+    char *token, *rest = myCopy;
 
     while((token = strsep(&rest, delim)) != NULL){
 
@@ -83,12 +87,11 @@ char **mashSplit(const char* args, const char* delim, int *argc){
     }
 
     *argc = tokensUsed - 1;
-    free(s);
+    free(myCopy);
 
     return tokens;
 }
 
-//This function like many other things at this point is bad
 int mashExecute(char ** args, int argc, SharedStuff * stuff){
     int pid, wapid;
     char dir[30] = "bin/";
@@ -120,6 +123,11 @@ int mashExecute(char ** args, int argc, SharedStuff * stuff){
     }
     // Exit
     else if(strcmp(args[0],MASH_EXIT) == 0){
+        return 1;
+    }
+
+    // Exit with shared memory intact (for debugging)
+    else if(strcmp(args[0],MASH_EXITSHM) == 0){
         exit(EXIT_SUCCESS);
     }
 

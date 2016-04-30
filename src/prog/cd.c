@@ -12,36 +12,57 @@ int BYTES_PER_SECTOR;
 
 int main(int argc, char *argv[]){
 
-    // if (argc == 1){
-    //
-    //     printf("No arguments given\n");
-    //     exit(1);
-    // }
-    // else if (argc > 2){
-    //
-    //     printf("cd takes one argument which is the folder\n");
-    // }
-    // else if (argc == 2 && strcmp(argv[1],"-h") == 0){
-    //
-    //     printf("cd takes one argument which is the folder\n");
-    // }
+    int shmid;
+    SharedStuff * stuff;
+    BYTES_PER_SECTOR = 512;
+    short newFLC;
 
-    int shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff),0666);
+    if (argc < 3){
+
+        printf("No arguments given\n");
+        exit(EXIT_SUCCESS);
+    }
+    else if (argc > 3){
+
+        printf("cd takes one argument which is the folder\n");
+        exit(EXIT_SUCCESS);
+    }
+    else if (argc == 3 && strcmp(argv[1],"-h") == 0){
+
+        printf("cd takes one argument which is the folder\n");
+        exit(EXIT_SUCCESS);
+    }
+
+    shmid = shmget(MASH_MEM_KEY, sizeof(SharedStuff),0666);
 
     if(shmid < 0){
 
         //We couldn't create the segment
-        perror("Oh my god shared memory didn't work, god save us.");
+        perror("Oh my god shared memory didn't work");
         exit(EXIT_FAILURE);
     }
 
-    SharedStuff *stuff = (SharedStuff *) shmat(shmid,NULL,0);
+    stuff = (SharedStuff *) shmat(shmid,NULL,0);
 
     FILE_SYSTEM_ID = fopen(stuff->filename,"r+");
 
-    BYTES_PER_SECTOR = 512;
+    if(FILE_SYSTEM_ID == NULL){
+        perror("Something has gone horribly wrong!");
+        exit(EXIT_FAILURE);
+    }
 
-    printf("%d\n", searchForFile(0,"LARGE.TXT"));
+    newFLC = searchForFolder(stuff->FLC,argv[1]);
+
+    if(newFLC != -1){
+        
+        stuff->FLC = newFLC;
+        strcpy(stuff->dir,argv[1]);
+    }
+    else{
+        perror("Directory doesn't exist");
+    }
+
+
 
     fclose(FILE_SYSTEM_ID);
 }

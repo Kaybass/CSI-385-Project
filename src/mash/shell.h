@@ -17,6 +17,7 @@
 #define MASH_EXIT    "exit"
 #define MASH_MOUNT   "mnt"
 #define MASH_PSHM    "pshm"
+#define MASH_EXITSHM "exitshm"
 
 int     mashLoop( char * filename);
 char *  mashRead();

@@ -46,6 +46,10 @@ short searchForFolder(short currentFLC, char * target){
             index++;
         }
 
+        if(target[strlen(target) - 1] == '/'){
+            depth--;
+        }
+
 
         sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
@@ -294,12 +298,13 @@ short searchForFile(short currentFLC, char * target){
 
             dirs = splitDirectoryString(target,&depth);
 
-            //the way string splitting works in our case /dir makes depth 2
-
             if(target[0] == '/'){
                 index++;
             }
 
+            if(target[strlen(target) - 1] == '/'){
+                return -1;
+            }
 
             sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
@@ -390,8 +395,6 @@ short searchForFile(short currentFLC, char * target){
             int  length = 0;
             int *weTheSectors;
 
-
-
             dirs = splitDirectoryString(target,&depth);
 
             ubyte *fatTable = readFatTable(512 * 9, 9 , 512);
@@ -411,6 +414,10 @@ short searchForFile(short currentFLC, char * target){
                         entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
                     }
                     entries[h].Filename[8] = '\0';
+                    for (int j = 8; j < 11; j++) {
+                        entries[h].Type[j - 8] = sector[j + (h - i * 16) * 32];
+                    }
+                    entries[h].Type[3] = '\0';
                     entries[h].Attributes = sector[11 + (h - i * 16) * 32];
 
                     int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
@@ -431,7 +438,7 @@ short searchForFile(short currentFLC, char * target){
                     if(h > j){
                         entries[i].Filename[j] = '\0';
                     }
-                    if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+                    if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                         (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
                         short tmp = entries[i].FirstLogicalCluster;
@@ -502,7 +509,10 @@ short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
                     entries[i].Filename[j] = sector[j + i * 32];
                 }
                 entries[i].Filename[8] = '\0';
-
+                for (int j = 8; j < 11; j++) {
+                    entries[i].Type[j - 8] = sector[j + i * 32];
+                }
+                entries[i].Type[3] = '\0';
                 entries[i].Attributes = sector[11 + i * 32];
 
                 int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
@@ -585,7 +595,10 @@ short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
                         entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
                     }
                     entries[h].Filename[8] = '\0';
-
+                    for (int j = 8; j < 11; j++) {
+                        entries[h].Type[j - 8] = sector[j + (h - i * 16) * 32];
+                    }
+                    entries[h].Type[3] = '\0';
                     entries[h].Attributes = sector[11 + (h - i * 16) * 32];
 
                     int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
@@ -657,12 +670,12 @@ short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
 
 char ** splitDirectoryString(char * directoryName, int *entryc){
 
-    char *s = strdup(directoryName);
+    char *myCopy = strdup(directoryName);
     int tokensAllocated = 1;
     int tokensUsed = 0;
 
     char **tokens = calloc(tokensAllocated, sizeof(char*));
-    char *token, *rest = s;
+    char *token, *rest = myCopy;
 
     while((token = strsep(&rest, DIR_CHAR)) != NULL){
 
@@ -683,19 +696,19 @@ char ** splitDirectoryString(char * directoryName, int *entryc){
     }
 
     *entryc = tokensUsed;
-    free(s);
+    free(myCopy);
 
     return tokens;
 }
 
 char ** splitFilenameExtension(char * file, int *shouldbetwo){
 
-    char *s = strdup(file);
+    char *myCopy = strdup(file);
     int tokensAllocated = 1;
     int tokensUsed = 0;
 
     char **tokens = calloc(tokensAllocated, sizeof(char*));
-    char *token, *rest = s;
+    char *token, *rest = myCopy;
 
     while((token = strsep(&rest, ".")) != NULL){
 
@@ -716,7 +729,7 @@ char ** splitFilenameExtension(char * file, int *shouldbetwo){
     }
 
     *shouldbetwo = tokensUsed;
-    free(s);
+    free(myCopy);
 
     return tokens;
 }
