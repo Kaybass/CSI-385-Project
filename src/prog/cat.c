@@ -70,6 +70,8 @@ int main(int argc, char *argv[]){
 
         free(s);
     }
+    
+    printf("\n");
 
     fclose(FILE_SYSTEM_ID);
 
