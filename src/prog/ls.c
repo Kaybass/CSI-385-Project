@@ -176,6 +176,10 @@ int main(int argc, char **argv)
 
                 char* type;
 
+                if(files[i].Attributes & FAT_SUBDIRECTORY)  != 0){
+                    strcpy(files[i].Type, "DIR")
+                }
+
                 printf("%8s %3s   %5d   %3d\n", files[i].Filename,
                                                  files[i].Type,
                                                  files[i].FileSize,
