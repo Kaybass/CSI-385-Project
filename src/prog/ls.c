@@ -176,7 +176,7 @@ int main(int argc, char **argv)
 
                 char* type;
 
-                if(files[i].Attributes & FAT_SUBDIRECTORY)  != 0){
+                if((files[i].Attributes & FAT_SUBDIRECTORY)  != 0){
                     strcpy(files[i].Type, "DIR");
                 }
 
