@@ -120,48 +120,54 @@ int main(int argc, char **argv)
         }
     }
     else{
-        image = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
-        read_sector(19,image);
+        // Read in sectors used in Root
+        int secRead = getRootSize(); 
 
-        for(int i = 0; i < 16; i++){
-            for(int j = 0; j < 8; j++){
-                files[i].Filename[j] = image[j + i * 32];
+        for (int z = 0; z < secRead; z++) {
+            image = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+            read_sector(z + 19, image);
+
+            for(int i = 0 + (z * 16); i < 16 + (z * 16); i++){
+                for(int j = 0; j < 8; j++){
+                    files[i].Filename[j] = image[j + (i - z * 16) * 32];
+                }
+                files[i].Filename[8] = '\0';
+
+                for(int j = 0; j < 3; j++){
+                    files[i].Type[j] = image[j + 8 + (i - z * 16) * 32];
+                }
+                files[i].Type[3] = '\0';
+
+                files[i].Attributes = image[11 + (i - z * 16) * 32];
+
+                files[i].CreationTime[0] = image[14 + (i - z * 16) * 32];
+                files[i].CreationTime[1] = image[15 + (i - z * 16) * 32];
+
+                files[i].CreationDate[0] = image[16 + (i - z * 16) * 32];
+                files[i].CreationDate[1] = image[17 + (i - z * 16) * 32];
+
+                files[i].LastAccessDate[0] = image[18 + (i - z * 16) * 32];
+                files[i].LastAccessDate[1] = image[19 + (i - z * 16) * 32];
+
+                files[i].LastWriteTime[0] = image[22 + (i - z * 16) * 32];
+                files[i].LastWriteTime[1] = image[23 + (i - z * 16) * 32];
+
+                files[i].LastWriteDate[0] = image[24 + (i - z * 16) * 32];
+                files[i].LastWriteDate[1] = image[25 + (i - z * 16) * 32];
+
+                h = ( ( (int) image[27 + (i - z * 16) * 32] ) << 8 ) & 0x0000ff00;
+                l =   ( (int) image[26 + (i - z * 16) * 32] )        & 0x000000ff;
+                files[i].FirstLogicalCluster = h | l;
+
+                h =   ( ( (int) image[31 + (i - z * 16) * 32] ) << 24 ) & 0xff000000;
+                l =   ( ( (int) image[30 + (i - z * 16) * 32] ) << 16 ) & 0x00ff0000;
+                j =   ( ( (int) image[29 + (i - z * 16) * 32] ) << 8  ) & 0x0000ff00;
+                k =   (   (int) image[28 + (i - z * 16) * 32] )         & 0x000000ff;
+                files[i].FileSize = h | l | j | k;
             }
-            files[i].Filename[8] = '\0';
 
-            for(int j = 0; j < 3; j++){
-                files[i].Type[j] = image[j + 8 + i  * 32];
-            }
-            files[i].Type[3] = '\0';
-
-            files[i].Attributes = image[11 + i  * 32];
-
-            files[i].CreationTime[0] = image[14 + i * 32];
-            files[i].CreationTime[1] = image[15 + i * 32];
-
-            files[i].CreationDate[0] = image[16 + i * 32];
-            files[i].CreationDate[1] = image[17 + i * 32];
-
-            files[i].LastAccessDate[0] = image[18 + i * 32];
-            files[i].LastAccessDate[1] = image[19 + i * 32];
-
-            files[i].LastWriteTime[0] = image[22 + i * 32];
-            files[i].LastWriteTime[1] = image[23 + i * 32];
-
-            files[i].LastWriteDate[0] = image[24 + i * 32];
-            files[i].LastWriteDate[1] = image[25 + i * 32];
-
-            h = ( ( (int) image[27 + i  * 32] ) << 8 ) & 0x0000ff00;
-            l =   ( (int) image[26 + i  * 32] )        & 0x000000ff;
-            files[i].FirstLogicalCluster = h | l;
-
-            h =   ( ( (int) image[31 + i * 32] ) << 24 ) & 0xff000000;
-            l =   ( ( (int) image[30 + i * 32] ) << 16 ) & 0x00ff0000;
-            j =   ( ( (int) image[29 + i * 32] ) << 8  ) & 0x0000ff00;
-            k =   (   (int) image[28 + i * 32] )         & 0x000000ff;
-            files[i].FileSize = h | l | j | k;
+            free(image);
         }
-        free(image);
     }
 
     printf("NAME     TYPE   SIZE   FLC\n");
