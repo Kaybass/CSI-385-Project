@@ -302,7 +302,6 @@ short searchForFile(short currentFLC, char * target){
             }
 
             int secRead = getRootSize();
-            printf("%d\n", secRead);
 
             ShortFileInfo* entries = (ShortFileInfo*)malloc(secRead * 16 * sizeof(ShortFileInfo));;
 
@@ -316,6 +315,12 @@ short searchForFile(short currentFLC, char * target){
                         entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
                     }
                     entries[h].Filename[8] = '\0';
+
+                    for (int j = 8; j < 11; j++) {
+                        entries[h].Type[j - 8] = sector[j + (h - i * 16) * 32];
+                    }
+                    entries[h].Type[3] = '\0';
+
                     entries[h].Attributes = sector[11 + (h - i * 16) * 32];
 
                     int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
@@ -495,6 +500,12 @@ short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
                         entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
                     }
                     entries[h].Filename[8] = '\0';
+
+                    for (int j = 8; j < 11; j++) {
+                        entries[h].Type[j - 8] = sector[j + (h - i * 16) * 32];
+                    }
+                    entries[h].Type[3] = '\0';
+
                     entries[h].Attributes = sector[11 + (h - i * 16) * 32];
 
                     int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
@@ -514,7 +525,7 @@ short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
                     if(h > j){
                         entries[i].Filename[j] = '\0';
                     }
-                    if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+                    if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                         (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
                         return searchHarderForFile(entries[i].FirstLogicalCluster,dirs,index + 1,depth);
@@ -601,7 +612,7 @@ short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
                     if(h > j){
                         entries[i].Filename[j] = '\0';
                     }
-                    if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+                    if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                         (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
                         short tmp = entries[i].FirstLogicalCluster;
