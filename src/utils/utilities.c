@@ -51,32 +51,32 @@ short searchForFolder(short currentFLC, char * target){
         }
 
 
-        sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
-        ShortFileInfo entries[16];
+        int secRead = getRootSize();
+        
+        ShortFileInfo* entries = (ShortFileInfo*)malloc(secRead * 16 * sizeof(ShortFileInfo));;
 
-        /*  Massive bad boy points here, we know that
-            every example image has a root folder that
-            is only one sector long and we're taking
-            advantage of that here.*/
-        read_sector(19,sector);
+        for (int i = 0; i < secRead; i++) {
+            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
-        for(int i = 0; i < BYTES_PER_SECTOR / 32; i++){
-            for(int j = 0; j < 8; j++){
-                entries[i].Filename[j] = sector[j + i * 32];
+            read_sector(i + 19, sector);
+
+            for(int h = 0 + (i * 16); h < 16 + (i * 16); h++){
+                for(int j = 0; j < 8; j++){
+                    entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
+                }
+                entries[h].Filename[8] = '\0';
+                entries[h].Attributes = sector[11 + (h - i * 16) * 32];
+
+                int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
+                int l =   ( (int) sector[26 + (h - i * 16) * 32] )        & 0x000000ff;
+                entries[h].FirstLogicalCluster = e | l;
             }
-            entries[i].Filename[8] = '\0';
 
-            entries[i].Attributes = sector[11 + i * 32];
-
-            int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
-            int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
-            entries[i].FirstLogicalCluster = h | l;
+            free(sector);
         }
 
-        free(sector);
-
-        for(int i = 0; i < 16; i++){
+        for(int i = 0; i < secRead * 16; i++){
 
             int h = strlen(entries[i].Filename);
             int j = strlen(dirs[index]);
@@ -171,32 +171,31 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
 
     if(currentFLC == 0){
 
-        sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+        int secRead = getRootSize();
+        
+        ShortFileInfo* entries = (ShortFileInfo*)malloc(secRead * 16 * sizeof(ShortFileInfo));;
 
-        ShortFileInfo entries[16];
+        for (int i = 0; i < secRead; i++) {
+            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
-        /*  Massive bad boy points here, we know that
-            every example image has a root folder that
-            is only one sector long and we're taking
-            advantage of that here.*/
-        read_sector(19,sector);
+            read_sector(i + 19, sector);
 
-        for(int i = 0; i < 16; i++){
-            for(int j = 0; j < 8; j++){
-                entries[i].Filename[j] = sector[j + i * 32];
+            for(int h = 0 + (i * 16); h < 16 + (i * 16); h++){
+                for(int j = 0; j < 8; j++){
+                    entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
+                }
+                entries[h].Filename[8] = '\0';
+                entries[h].Attributes = sector[11 + (h - i * 16) * 32];
+
+                int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
+                int l =   ( (int) sector[26 + (h - i * 16) * 32] )        & 0x000000ff;
+                entries[h].FirstLogicalCluster = e | l;
             }
-            entries[i].Filename[8] = '\0';
 
-            entries[i].Attributes = sector[11 + i * 32];
-
-            int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
-            int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
-            entries[i].FirstLogicalCluster = h | l;
+            free(sector);
         }
 
-        free(sector);
-
-        for(int i = 0; i < 16; i++){
+        for(int i = 0; i < secRead * 16; i++){
 
             int h = strlen(entries[i].Filename);
             int j = strlen(dirs[index]);
@@ -204,12 +203,10 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
             if(h > j){
                 entries[i].Filename[j] = '\0';
             }
-
-            if(strcmp(dirs[1],entries[i].Filename) == 0 &&
+            if(strcmp(dirs[index],entries[i].Filename) == 0 &&
                 (FAT_SUBDIRECTORY & entries[i].Attributes) != 0){
 
                 if(depth > index + 1){
-
                     return searchHarderForFolder(entries[i].FirstLogicalCluster,dirs,index + 1,depth);
                 }
                 else{
@@ -219,7 +216,6 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
             }
         }
         return -1;
-
     }
     else{
         int  length = 0;
@@ -305,37 +301,32 @@ short searchForFile(short currentFLC, char * target){
                 return -1;
             }
 
-            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+            int secRead = getRootSize();
+            printf("%d\n", secRead);
 
-            ShortFileInfo entries[16];
+            ShortFileInfo* entries = (ShortFileInfo*)malloc(secRead * 16 * sizeof(ShortFileInfo));;
 
-            /*  Massive bad boy points here, we know that
-                every example image has a root folder that
-                is only one sector long and we're taking
-                advantage of that here.*/
-            read_sector(19,sector);
+            for (int i = 0; i < secRead; i++) {
+                sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
-            for(int i = 0; i < BYTES_PER_SECTOR / 32; i++){
-                for(int j = 0; j < 8; j++){
-                    entries[i].Filename[j] = sector[j + i * 32];
+                read_sector(i + 19, sector);
+
+                for(int h = 0 + (i * 16); h < 16 + (i * 16); h++){
+                    for(int j = 0; j < 8; j++){
+                        entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
+                    }
+                    entries[h].Filename[8] = '\0';
+                    entries[h].Attributes = sector[11 + (h - i * 16) * 32];
+
+                    int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
+                    int l =   ( (int) sector[26 + (h - i * 16) * 32] )        & 0x000000ff;
+                    entries[h].FirstLogicalCluster = e | l;
                 }
-                entries[i].Filename[8] = '\0';
 
-                for (int j = 8; j < 11; j++) {
-                    entries[i].Type[j - 8] = sector[j + i * 32];
-                }
-                entries[i].Type[3] = '\0';
-
-                entries[i].Attributes = sector[11 + i * 32];
-
-                int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
-                int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
-                entries[i].FirstLogicalCluster = h | l;
+                free(sector);
             }
 
-            free(sector);
-
-            for(int i = 0; i < 16; i++){
+            for(int i = 0; i < secRead * 16; i++){
                 if(depth > index + 1){
                     int h = strlen(entries[i].Filename);
                     int j = strlen(dirs[index]);
@@ -490,35 +481,31 @@ short searchHarderForFile(short currentFLC, char ** dirs, int index, int depth){
 
         if(currentFLC == 0){
 
-            sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+            int secRead = getRootSize();
 
-            ShortFileInfo entries[16];
+            ShortFileInfo* entries = (ShortFileInfo*)malloc(secRead * 16 * sizeof(ShortFileInfo));;
 
-            /*  Massive bad boy points here, we know that
-                every example image has a root folder that
-                is only one sector long and we're taking
-                advantage of that here.*/
-            read_sector(19,sector);
+            for (int i = 0; i < secRead; i++) {
+                sector = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
 
-            for(int i = 0; i < 16; i++){
-                for(int j = 0; j < 8; j++){
-                    entries[i].Filename[j] = sector[j + i * 32];
+                read_sector(i + 19, sector);
+
+                for(int h = 0 + (i * 16); h < 16 + (i * 16); h++){
+                    for(int j = 0; j < 8; j++){
+                        entries[h].Filename[j] = sector[j + (h - i * 16) * 32];
+                    }
+                    entries[h].Filename[8] = '\0';
+                    entries[h].Attributes = sector[11 + (h - i * 16) * 32];
+
+                    int e = ( ( (int) sector[27 + (h - i * 16) * 32] ) << 8 ) & 0x0000ff00;
+                    int l =   ( (int) sector[26 + (h - i * 16) * 32] )        & 0x000000ff;
+                    entries[h].FirstLogicalCluster = e | l;
                 }
-                entries[i].Filename[8] = '\0';
-                for (int j = 8; j < 11; j++) {
-                    entries[i].Type[j - 8] = sector[j + i * 32];
-                }
-                entries[i].Type[3] = '\0';
-                entries[i].Attributes = sector[11 + i * 32];
 
-                int h = ( ( (int) sector[27 + i * 32] ) << 8 ) & 0x0000ff00;
-                int l =   ( (int) sector[26 + i * 32] )        & 0x000000ff;
-                entries[i].FirstLogicalCluster = h | l;
+                free(sector);
             }
 
-            free(sector);
-
-            for(int i = 0; i < 16; i++){
+            for(int i = 0; i < secRead * 16; i++){
 
                 if(depth > index + 1){
                     int h = strlen(entries[i].Filename);
@@ -753,3 +740,52 @@ int* lookupSectors(int FLC, int * length, ubyte* image){
 
     return sectors;
 }
+
+int getRootSize()
+{
+    int done = 0;
+    int currentSector = 19;
+    int sectorsRead = 0;
+    ubyte* image;
+
+    while (done != 1) {
+        image = (ubyte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
+        read_sector(currentSector, image);
+
+        for (int i = 0; i < 16; i++) {
+            if (image[i * 32] == 0x00) {
+                done = 1;
+                break;
+            }
+        }
+
+        sectorsRead++;
+        currentSector++;
+
+        free(image);
+    }
+
+
+    return sectorsRead;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

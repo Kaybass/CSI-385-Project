@@ -90,4 +90,6 @@ char ** splitFilenameExtension(char * file, int *shouldbetwo);
 
 int* lookupSectors(int FLC, int * length, ubyte* image);
 
+int getRootSize();
+
 #endif
