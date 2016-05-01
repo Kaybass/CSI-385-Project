@@ -53,7 +53,7 @@ short searchForFolder(short currentFLC, char * target){
 
 
         int secRead = getRootSize();
-        
+
         ShortFileInfo* entries = (ShortFileInfo*)malloc(secRead * 16 * sizeof(ShortFileInfo));;
 
         for (int i = 0; i < secRead; i++) {
@@ -172,7 +172,7 @@ short searchHarderForFolder(short currentFLC, char ** dirs, int index, int depth
     if(currentFLC == 0){
 
         int secRead = getRootSize();
-        
+
         ShortFileInfo* entries = (ShortFileInfo*)malloc(secRead * 16 * sizeof(ShortFileInfo));;
 
         for (int i = 0; i < secRead; i++) {
@@ -780,23 +780,3 @@ int getRootSize()
     return sectorsRead;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
