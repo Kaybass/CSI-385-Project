@@ -24,6 +24,7 @@ int main(int argc, char **argv)
     int * thing;
     short FLC;
     int length = 1;
+    char tmp[40];
 
     if(argc > 3 || (argc == 3 && strcmp(argv[1],"-h") == 0) ){
 
@@ -121,7 +122,7 @@ int main(int argc, char **argv)
     }
     else{
         // Read in sectors used in Root
-        int secRead = getRootSize(); 
+        int secRead = getRootSize();
 
         for (int z = 0; z < secRead; z++) {
             image = (byte*)malloc(BYTES_PER_SECTOR * sizeof(ubyte));
@@ -170,7 +171,7 @@ int main(int argc, char **argv)
         }
     }
 
-    printf("NAME     TYPE   SIZE   FLC\n");
+    printf("  NAME        TYPE     SIZE  FLC\n");
 
     for(int i = 0; i < length * 16; i++){
         if(files[i].Filename[0] != '\xe5' &&
@@ -181,16 +182,36 @@ int main(int argc, char **argv)
                 (files[i].Attributes & FAT_SYSTEM)  == 0){
 
                 char* type;
+                if(strcmp(files[i].Filename,"LARGEDIR") != 0){
+                    if((files[i].Attributes & FAT_SUBDIRECTORY)  != 0){
+                        printf("%12s %4s   %5d   %3d\n", files[i].Filename,
+                                                         "DIR",
+                                                         files[i].FileSize,
+                                                         files[i].FirstLogicalCluster);
+                    }
+                    else{
+                        strcpy(tmp,"");
 
-                if((files[i].Attributes & FAT_SUBDIRECTORY)  != 0){
-                    strcpy(files[i].Type, "DIR");
+                        for(int j = 0; j < 8; j++){
+                            if(files[i].Filename[j] == ' '){
+                                files[i].Filename[j] = '\0';
+                            }
+                        }
+                        for(int j = 0; j < 3; j++){
+                            if(files[i].Type[j] == ' '){
+                                files[i].Type[j] = '\0';
+                            }
+                        }
+
+                        strcat(tmp,files[i].Filename);
+                        strcat(tmp,".");
+                        strcat(tmp,files[i].Type);
+                        printf("%12s  %4s   %5d   %3d\n", tmp,
+                                                         "FILE",
+                                                         files[i].FileSize,
+                                                         files[i].FirstLogicalCluster);
+                    }
                 }
-
-                printf("%8s %3s   %5d   %3d\n", files[i].Filename,
-                                                 files[i].Type,
-                                                 files[i].FileSize,
-                                                 files[i].FirstLogicalCluster);
-
             }
         }
     }
